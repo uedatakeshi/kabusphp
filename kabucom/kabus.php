@@ -79,6 +79,7 @@ class Kabus
             )
         );
         $context = stream_context_create($opts);
+        usleep(100000);// 0.1秒待つ
         $json = file_get_contents($url, FALSE, $context);
 
         if (!$json) {
