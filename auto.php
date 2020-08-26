@@ -62,6 +62,7 @@ while (1) {
     sleep(5 * 60); // 5分おき
 }
 pg_close($dbconn);
+
 exit;
 
 function insQuery($item) {
