@@ -1,0 +1,11 @@
+.svn/
+Thumbs.db
+.DS_Store
+bak/
+data/
+log/
+*~
+*.bak
+*_bak
+*.gz
+
