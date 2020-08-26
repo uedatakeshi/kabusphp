@@ -1,18 +1,20 @@
 <?php
 require_once "vendor/autoload.php";
 
+/*
 use Monolog\Logger;
 use Monolog\Handler\StreamHandler;
 use Monolog\Handler\RotatingFileHandler;
 use Monolog\Formatter\LineFormatter;
+ */
 
 
-
-$kabus = new Kabucom\Kabus("pub");
+$kabus = new Kabucom\Kabus("");
 $codes = new Kabucom\Code();
 $kabus->getName();
+echo $kabus->apikey;
 
-print_r($codes->allCode);
+//print_r($codes->allCode);
 exit;
 
 $value = $kabus->getSymbol(7974, 1);
@@ -32,7 +34,7 @@ foreach ($codes->allCode as $v) {
     // 抽出条件で絞る
     if (($PreviousClose < 1000) && ($PreviousClose > 600)) {
         if ($TradingVolume > 100000) {
-            list[] = $v;
+            $list[] = $v;
         }
     }
 }
