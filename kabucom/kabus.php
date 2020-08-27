@@ -45,26 +45,26 @@ class Kabus
     // トークン発行
     public function getToken() {
         $url = "http://localhost:" . $this->port . "/kabusapi/token";
-        $data = array('APIPassword' => $this->password);
-        $data = http_build_query($data);
-        $opts = array(
-            'http' => array(
+        $data = ['APIPassword' => $this->password];
+        //$data = http_build_query($data);
+        $opts = [
+            'http' => [
                 'method' => "POST",
-                'header'=> "Content-type: application/json",
-                'content' => $data,
-                  'ignore_errors' => true,
-    'protocol_version' => '1.1'
-            )
-        );
+                'header'=> "Content-type: application/json\r\n" . "Accept: application/json\r\n",
+                'content' => json_encode($data),
+                'ignore_errors' => true,
+                'protocol_version' => '1.1'
+            ]
+        ];
         $context = stream_context_create($opts);
-        $json = file_get_contents($url, FALSE, $context);
+        $json = file_get_contents($url, false, $context);
         echo $json;
         if (!$json) {
             //$this->log->warning("API URLが読み込めない");
             return false;
         }
 
-        $response = json_decode($json);
+        $response = json_decode($json, true);
         var_dump($response);
         if ($response['ResultCode'] === 0) {
             $this->apikey = $response['Token'];
