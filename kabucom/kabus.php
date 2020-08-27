@@ -34,7 +34,7 @@ class Kabus
 
     // 時価情報・板情報
     public function getsymbol($symbol, $exchange) {
-        $param = "/kabusapi/symbol/" . $symbol . "@" . $exchange;
+        $param = "/kabusapi/board/" . $symbol . "@" . $exchange;
         $response = $this->sendApi($param);
 
         return $response;
@@ -107,7 +107,6 @@ class Kabus
     public function getToken() {
         $url = "http://localhost:" . $this->port . "/kabusapi/token";
         $data = ['APIPassword' => $this->password];
-        //$data = http_build_query($data);
         $opts = [
             'http' => [
                 'method' => "POST",
@@ -126,14 +125,12 @@ class Kabus
                 exit;
             }
         }
-        echo $json;
         if (!$json) {
             $this->log->error("API URLが読み込めない", [$url, $data]);
             exit;
         }
 
         $response = json_decode($json, true);
-        var_dump($response);
         if ($response['ResultCode'] === 0) {
             $this->apikey = $response['Token'];
         } else {
@@ -156,8 +153,10 @@ class Kabus
         $context = stream_context_create($opts);
         usleep(100000);// 0.1秒待つ
         $json = file_get_contents($url, FALSE, $context);
+                $this->log->warning("リクエスト", [$url]);
 
         if (isset($http_response_header)) {
+        echo $http_response_header[0];
             $pos = strpos($http_response_header[0], '200');
             if ($pos === false) {
                 $this->log->error("リクエスト失敗", [$url, $json]);

@@ -22,9 +22,9 @@ $kabus->getName();
 echo $kabus->apikey;
 
 //print_r($codes->allCode);
-exit;
+//exit;
 
-$value = $kabus->getSymbol('7974', 1);
+$value = $kabus->getsymbol(9433, 1);
 print_r($value);
 exit;
 

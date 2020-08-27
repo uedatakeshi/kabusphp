@@ -46,7 +46,7 @@
             "ruflin/elastica": "Allow sending log messages to an Elastic Search server",
             "sentry/sentry": "Allow sending log messages to a Sentry server"
         },
-        "time": "2020-07-23T08:35:51+00:00",
+        "time": "2020-07-23 08:35:51",
         "type": "library",
         "extra": {
             "branch-alias": {
@@ -76,16 +76,6 @@
             "log",
             "logging",
             "psr-3"
-        ],
-        "funding": [
-            {
-                "url": "https://github.com/Seldaek",
-                "type": "github"
-            },
-            {
-                "url": "https://tidelift.com/funding/github/packagist/monolog/monolog",
-                "type": "tidelift"
-            }
         ]
     },
     {
@@ -106,7 +96,7 @@
         "require": {
             "php": ">=5.3.0"
         },
-        "time": "2020-03-23T09:12:05+00:00",
+        "time": "2020-03-23 09:12:05",
         "type": "library",
         "extra": {
             "branch-alias": {
