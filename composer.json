@@ -6,5 +6,8 @@
         "psr-4": {
             "Kabucom\\": "kabucom/"
         }
+    },
+    "config": {
+        "secure-http": false
     }
 }

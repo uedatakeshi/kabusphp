@@ -1,12 +1,10 @@
 <?php
 namespace Kabucom;
 
-/*
 use Monolog\Logger;
 use Monolog\Handler\StreamHandler;
 use Monolog\Handler\RotatingFileHandler;
 use Monolog\Formatter\LineFormatter;
- */
 
 class Kabus
 {
@@ -23,10 +21,8 @@ class Kabus
             $this->mode = "pub";
             $this->port = "18080";
         }
-		/*
         $this->log = new Logger('app');
         $this->log->pushHandler(new StreamHandler('./log/error.log', Logger::WARNING));
-		 */
 		$this->getToken();
     }
 
@@ -60,7 +56,7 @@ class Kabus
         $json = file_get_contents($url, false, $context);
         echo $json;
         if (!$json) {
-            //$this->log->warning("API URLが読み込めない");
+            $this->log->warning("API URLが読み込めない");
             return false;
         }
 
@@ -69,7 +65,7 @@ class Kabus
         if ($response['ResultCode'] === 0) {
             $this->apikey = $response['Token'];
         } else {
-            //$this->log->warning("APIトークン発行に失敗しました");
+            $this->log->warning("APIトークン発行に失敗しました");
             exit;
         }
 
