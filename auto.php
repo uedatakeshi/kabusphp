@@ -16,7 +16,7 @@ $zenba_e = mktime(11, 30, 0);//前場引け
 $goba_s = mktime(12, 30, 0);//後場寄付
 $goba_e = mktime(15, 00, 0);//後場引け
 
-$kabus = new Kabucom\Kabus("");
+$kabus = new Kabucom\Kabus("pub");
 $codes = new Kabucom\Code();
 $kabus->getName();
 echo $kabus->apikey;
@@ -24,12 +24,16 @@ echo $kabus->apikey;
 //print_r($codes->allCode);
 //exit;
 
-$value = $kabus->getsymbol(9433, 1);
-print_r($value);
-exit;
+//$value = $kabus->getsymbol(7974, 1);
+//print_r($value);
+//exit;
 
 $list = [];// 本日の対象銘柄のリスト
+$n = 0;
 foreach ($codes->allCode as $v) {
+	if ($n > 50) {
+		break;
+	}
     $item = $kabus->getSymbol($v, 1);// 東証のみなので全部1
     //時価総額
     $TotalMarketValue = $item['TotalMarketValue'];
@@ -44,6 +48,7 @@ foreach ($codes->allCode as $v) {
             $list[] = $v;
         }
     }
+    $n++;
 }
 print_r($list);// このリストに対し9:00から５分おきにひらすら情報取得してDBに入れて行く
 exit;
