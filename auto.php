@@ -11,6 +11,10 @@ use Monolog\Formatter\LineFormatter;
 
 $maxPrice = 1000;// 株価千円以下
 $minVolume = 100000;// 出来高１０万以上
+$zenba_s = mktime(9, 30, 0);// 前場寄付
+$zenba_e = mktime(11, 30, 0);//前場引け
+$goba_s = mktime(12, 30, 0);//後場寄付
+$goba_e = mktime(15, 00, 0);//後場引け
 
 $kabus = new Kabucom\Kabus("");
 $codes = new Kabucom\Code();
@@ -48,17 +52,15 @@ $db = pg_connect("host=localhost dbname=" . DB_NAME. " user=" . DB_USER . " pass
 
 while (1) {
     $this_time = time();
-    $zenba_s = mktime(9, 30, 0);
-    $zenba_e = mktime(11, 30, 0);
-    $goba_s = mktime(12, 30, 0);
-    $goba_e = mktime(15, 00, 0);
     if (($this_time >= $zenba_s) && ($this_time <= $zenba_e) && ($this_time >= $goba_s)) {
-        // 
+        // INS
         foreach ($list as $k => $v) {
             $item = $kabus->getSymbol($v, 1);// 東証のみなので全部1
             $query = insQuery($item);
             $result = pg_query($query) or die('Query failed: ' . pg_last_error());
         }
+        // SELECT
+        $query = "SELECT * FROM ";
     }
     if ($this_time > $goba_e) {
         break;

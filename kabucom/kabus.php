@@ -10,6 +10,7 @@ class Kabus
 {
     public $name = "ueda";
     public $password = DEV_API_PASSWORD;
+    public $order_password = ORDER_PASSWORD;
     public $apikey = "a68e2d55951b4756a3131f7942974eeb";
     public $mode = "dev";
     public $port = "18081";
@@ -37,6 +38,69 @@ class Kabus
         $response = $this->sendApi($param);
 
         return $response;
+    }
+
+    // 取引余力（現物）
+    // StockAccountWallet
+    public function getcash() {
+        $param = "/wallet/cash";
+        $response = $this->sendApi($param);
+
+        return $response;
+    }
+
+    // 残高照会
+    public function getpositions($product=0) {
+        $param = "/positions?product=" . $product;
+        $response = $this->sendApi($param);
+
+        return $response;
+    }
+
+    // 注文約定照会
+    public function getorders($product=0) {
+        $param = "/orders?product=" . $product;
+        $response = $this->sendApi($param);
+
+        return $response;
+    }
+
+    // 注文発注
+    public function getsendorder($symbol, $side, $qty, $price, $expireday, $frontordertype) {
+        $url = "http://localhost:" . $this->port . "/sendorder";
+        $data = [
+            'Password' => $this->order_password,
+            'Symbol' => $symbol,
+            'Exchange' => 1,
+            'SecurityType' => 1,
+            'Side' => '{$side}',
+            'CashMargin' => 1,
+            'DelivType' => 1,// 受渡区分 分からない
+            'FundType' => '  ',// 資産区分 分からない
+            'AccountType' => 1,// 口座種別 分からない
+            'Qty' => $qty,
+            'Price' => $price,
+            'ExpireDay' => $expireday,
+            'FrontOrderType' => $frontordertype,
+        ];
+        $context = stream_context_create($opts);
+        $json = file_get_contents($url, false, $context);
+        if (isset($http_response_header)) {
+            $pos = strpos($http_response_header[0], '200');
+            if ($pos === false) {
+                $this->log->error("リクエスト失敗", [$url, $data, $json]);
+                exit;
+            }
+        }
+        $response = json_decode($json, true);
+        if ($response['Result'] === 0) {
+            $order_id = $response['OrderId'];
+        } else {
+            $this->log->error("発注に失敗しました", [$url, $data]);
+            exit;
+        }
+
+        return $order_id;
     }
 
     // トークン発行
