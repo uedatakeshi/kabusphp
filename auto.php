@@ -1,5 +1,6 @@
 <?php
 require_once "vendor/autoload.php";
+require_once 'config.php';
 
 /*
 use Monolog\Logger;
@@ -8,6 +9,8 @@ use Monolog\Handler\RotatingFileHandler;
 use Monolog\Formatter\LineFormatter;
  */
 
+$maxPrice = 1000;// 株価千円以下
+$minVolume = 100000;// 出来高１０万以上
 
 $kabus = new Kabucom\Kabus("");
 $codes = new Kabucom\Code();
@@ -17,7 +20,7 @@ echo $kabus->apikey;
 //print_r($codes->allCode);
 exit;
 
-$value = $kabus->getSymbol(7974, 1);
+$value = $kabus->getSymbol('7974', 1);
 print_r($value);
 exit;
 
@@ -32,8 +35,8 @@ foreach ($codes->allCode as $v) {
     $TradingVolume = $item['TradingVolume'];
 
     // 抽出条件で絞る
-    if (($PreviousClose < 1000) && ($PreviousClose > 600)) {
-        if ($TradingVolume > 100000) {
+    if (($PreviousClose < $maxPrice) && ($PreviousClose > 600)) {
+        if ($TradingVolume > $minVolume) {
             $list[] = $v;
         }
     }
@@ -41,8 +44,7 @@ foreach ($codes->allCode as $v) {
 print_r($list);// このリストに対し9:00から５分おきにひらすら情報取得してDBに入れて行く
 exit;
 
-$dbconn = pg_connect("host=localhost dbname=kabus_db user=postgres password=foo")
-    or die('Could not connect: ' . pg_last_error());
+$db = pg_connect("host=localhost dbname=" . DB_NAME. " user=" . DB_USER . " password=" . DB_PASS);
 
 while (1) {
     $this_time = time();
@@ -63,80 +65,87 @@ while (1) {
     }
     sleep(5 * 60); // 5分おき
 }
-pg_close($dbconn);
+pg_close($db);
 
 exit;
 
 function insQuery($item) {
 
+    $today = date("Y-m-d");
+    foreach ($item as $k => $v) {
+        $item[$k] = pg_escape_string($v);
+    }
+
     $query = <<<END
-INSERT INTO symbols (
-    Symbol,
-    SymbolName,
-    Exchange,
-    ExchangeName,
-    CurrentPrice,
-    CurrentPriceTime,
-    CurrentPriceChangeStatus, 
-    CurrentPriceStatus,
-    CalcPrice,
-    PreviousClose,
-    PreviousCloseTime,
-    ChangePreviousClose,
-    ChangePreviousClosePer,
-    OpeningPrice,
-    OpeningPriceTime,
-    HighPrice,
-    HighPriceTime,
-    LowPrice,
-    LowPriceTime,
-    TradingVolume,
-    TradingVolumeTime,
-    VWAP,
-    TradingValue,
-    BidQty,
-    BidPrice,
-    BidTime,
-    BidSign,
-    MarketOrderSellQty,
-    MarketOrderBuyQty,
-    OverSellQty,
-    UnderBuyQty,
-    TotalMarketValue 
-) VALUES (
-    '{$item['Symbol']}',
-    '{$item['SymbolName']}',
-    '{$item['Exchange']}',
-    '{$item['ExchangeName']}',
-    '{$item['CurrentPrice']}',
-    '{$item['CurrentPriceTime']}',
-    '{$item['CurrentPriceChangeStatus']}', 
-    '{$item['CurrentPriceStatus']}',
-    '{$item['CalcPrice']}',
-    '{$item['PreviousClose']}',
-    '{$item['PreviousCloseTime']}',
-    '{$item['ChangePreviousClose']}',
-    '{$item['ChangePreviousClosePer']}',
-    '{$item['OpeningPrice']}',
-    '{$item['OpeningPriceTime']}',
-    '{$item['HighPrice']}',
-    '{$item['HighPriceTime']}',
-    '{$item['LowPrice']}',
-    '{$item['LowPriceTime']}',
-    '{$item['TradingVolume']}',
-    '{$item['TradingVolumeTime']}',
-    '{$item['VWAP']}',
-    '{$item['TradingValue']}',
-    '{$item['BidQty']}',
-    '{$item['BidPrice']}',
-    '{$item['BidTime']}',
-    '{$item['BidSign']}',
-    '{$item['MarketOrderSellQty']}',
-    '{$item['MarketOrderBuyQty']}',
-    '{$item['OverSellQty']}',
-    '{$item['UnderBuyQty']}',
-    '{$item['TotalMarketValue']}' 
-) 
+    INSERT INTO symbols (
+        reg_date,
+        Symbol,
+        SymbolName,
+        Exchange,
+        ExchangeName,
+        CurrentPrice,
+        CurrentPriceTime,
+        CurrentPriceChangeStatus, 
+        CurrentPriceStatus,
+        CalcPrice,
+        PreviousClose,
+        PreviousCloseTime,
+        ChangePreviousClose,
+        ChangePreviousClosePer,
+        OpeningPrice,
+        OpeningPriceTime,
+        HighPrice,
+        HighPriceTime,
+        LowPrice,
+        LowPriceTime,
+        TradingVolume,
+        TradingVolumeTime,
+        VWAP,
+        TradingValue,
+        BidQty,
+        BidPrice,
+        BidTime,
+        BidSign,
+        MarketOrderSellQty,
+        MarketOrderBuyQty,
+        OverSellQty,
+        UnderBuyQty,
+        TotalMarketValue 
+    ) VALUES (
+        '{$today}',
+        '{$item['Symbol']}',
+        '{$item['SymbolName']}',
+        '{$item['Exchange']}',
+        '{$item['ExchangeName']}',
+        '{$item['CurrentPrice']}',
+        '{$item['CurrentPriceTime']}',
+        '{$item['CurrentPriceChangeStatus']}', 
+        '{$item['CurrentPriceStatus']}',
+        '{$item['CalcPrice']}',
+        '{$item['PreviousClose']}',
+        '{$item['PreviousCloseTime']}',
+        '{$item['ChangePreviousClose']}',
+        '{$item['ChangePreviousClosePer']}',
+        '{$item['OpeningPrice']}',
+        '{$item['OpeningPriceTime']}',
+        '{$item['HighPrice']}',
+        '{$item['HighPriceTime']}',
+        '{$item['LowPrice']}',
+        '{$item['LowPriceTime']}',
+        '{$item['TradingVolume']}',
+        '{$item['TradingVolumeTime']}',
+        '{$item['VWAP']}',
+        '{$item['TradingValue']}',
+        '{$item['BidQty']}',
+        '{$item['BidPrice']}',
+        '{$item['BidTime']}',
+        '{$item['BidSign']}',
+        '{$item['MarketOrderSellQty']}',
+        '{$item['MarketOrderBuyQty']}',
+        '{$item['OverSellQty']}',
+        '{$item['UnderBuyQty']}',
+        '{$item['TotalMarketValue']}' 
+    ) 
 END;
 
     return $query;

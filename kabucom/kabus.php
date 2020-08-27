@@ -9,7 +9,7 @@ use Monolog\Formatter\LineFormatter;
 class Kabus
 {
     public $name = "ueda";
-    public $password = "yDsP1ZzK44Bp";
+    public $password = DEV_API_PASSWORD;
     public $apikey = "a68e2d55951b4756a3131f7942974eeb";
     public $mode = "dev";
     public $port = "18081";
@@ -20,8 +20,9 @@ class Kabus
         if ($mode == "pub") {
             $this->mode = "pub";
             $this->port = "18080";
+            $this->password = PUB_API_PASSWORD;
         }
-        $this->log = new Logger('app');
+        $this->log = new Logger('api');
         $this->log->pushHandler(new StreamHandler('./log/error.log', Logger::WARNING));
 		$this->getToken();
     }
@@ -54,10 +55,17 @@ class Kabus
         ];
         $context = stream_context_create($opts);
         $json = file_get_contents($url, false, $context);
+        if (isset($http_response_header)) {
+            $pos = strpos($http_response_header[0], '200');
+            if ($pos === false) {
+                $this->log->error("リクエスト失敗", [$url, $data, $json]);
+                exit;
+            }
+        }
         echo $json;
         if (!$json) {
-            $this->log->warning("API URLが読み込めない");
-            return false;
+            $this->log->error("API URLが読み込めない", [$url, $data]);
+            exit;
         }
 
         $response = json_decode($json, true);
@@ -65,7 +73,7 @@ class Kabus
         if ($response['ResultCode'] === 0) {
             $this->apikey = $response['Token'];
         } else {
-            $this->log->warning("APIトークン発行に失敗しました");
+            $this->log->error("APIトークン発行に失敗しました", [$url, $data]);
             exit;
         }
 
@@ -85,12 +93,15 @@ class Kabus
         usleep(100000);// 0.1秒待つ
         $json = file_get_contents($url, FALSE, $context);
 
-        if (!$json) {
-            //$this->log->warning("API URLが読み込めない");
-            return false;
+        if (isset($http_response_header)) {
+            $pos = strpos($http_response_header[0], '200');
+            if ($pos === false) {
+                $this->log->error("リクエスト失敗", [$url, $json]);
+                exit;
+            }
         }
 
-        $response = json_decode($json);
+        $response = json_decode($json, true);
         return $response;
     }
 }
