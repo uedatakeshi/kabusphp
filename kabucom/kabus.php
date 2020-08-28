@@ -36,7 +36,7 @@ class Kabus
     public function getsymbol($symbol, $exchange) {
         $param = "/kabusapi/board/" . $symbol . "@" . $exchange;
         $response = $this->sendApi($param);
-                $this->log->warning("リクエスト", [$url, $response]);
+        $this->log->warning("リクエスト", [$param, $response]);
 
         return $response;
     }
@@ -165,6 +165,40 @@ class Kabus
 
         $response = json_decode($json, true);
         return $response;
+    }
+
+    // 銘柄登録全解除
+    public function removeAll() {
+        $url = "http://localhost:" . $this->port . "/kabusapi/unregister/all";
+        $opts = [
+            'http' => [
+                'method' => "PUT",
+                'header'=> "Content-type: application/json\r\n"
+                . "X-API-KEY: " . $this->apikey ,
+                'ignore_errors' => true,
+                'protocol_version' => '1.1'
+            ]
+        ];
+        $context = stream_context_create($opts);
+        $json = file_get_contents($url, false, $context);
+        if (isset($http_response_header)) {
+            $pos = strpos($http_response_header[0], '200');
+            if ($pos === false) {
+                $this->log->error("リクエスト失敗", [$url, $json]);
+                exit;
+            }
+        }
+        if (!$json) {
+            $this->log->error("API URLが読み込めない", [$url]);
+            exit;
+        }
+
+        $response = json_decode($json, true);
+        if ($response['RegistList']) {
+            $this->log->error("銘柄登録全解除に失敗しました", [$url]);
+            exit;
+        }
+        return true;
     }
 }
 
