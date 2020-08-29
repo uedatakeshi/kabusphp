@@ -32,14 +32,20 @@ echo $kabus->apikey;
 // 最初にAPI銘柄リストをリセット
 $kabus->removeAll();
 
+
+$db = pg_connect("host=localhost dbname=" . DB_NAME. " user=" . DB_USER . " password=" . DB_PASS);
+
 $list = [];// 本日の対象銘柄のリスト
 $n = 0;
 foreach ($codes->allCode as $v) {
-	if ($n > 50) {
-        // $kabus->removeAll();// 50件たまったら削除
+	if ($n > 49) {
+        $kabus->removeAll();// 50件たまったら削除
+        $n = 0;
 		break;
 	}
     $item = $kabus->getSymbol($v, 1);// 東証のみなので全部1
+    $query = insQuery($item);
+    $result = pg_query($query);
     //時価総額 
     $TotalMarketValue = $item['TotalMarketValue'];
     //前日終値
@@ -58,6 +64,8 @@ foreach ($codes->allCode as $v) {
     }
     $n++;
 }
+pg_close($db);
+
 print_r($list);// このリストに対し9:00から５分おきにひらすら情報取得してDBに入れて行く
 exit;
 

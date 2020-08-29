@@ -1,4 +1,6 @@
 createdb kabus_db -E UTF-8 -U postgres
+createdb -U postgres kabus_db
+
 
 CREATE TABLE symbols(
 id serial primary key,
