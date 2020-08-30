@@ -152,7 +152,7 @@ class Kabus
             )
         );
         $context = stream_context_create($opts);
-        //usleep(100000);// 0.1秒待つ
+        usleep(100000);// 0.1秒待つ
         $json = file_get_contents($url, FALSE, $context);
 
         if (isset($http_response_header)) {
@@ -184,7 +184,7 @@ class Kabus
             $pos = strpos($http_response_header[0], '200');
             if ($pos === false) {
                 $this->log->error("リクエスト失敗", [$url, $json]);
-                exit;
+                //exit;
             }
         }
         if (!$json) {
