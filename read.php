@@ -7,10 +7,10 @@ $maxPrice = 1000;// 株価千円以下
 $minVolume = 100000;// 出来高１０万以上
 $minMarketVal = 500000000000;// 時価総額５０００億円以上
 date_default_timezone_set('Asia/Tokyo');
-$zenba_s = mktime(21, 25, 0);// 前場寄付
-$zenba_e = mktime(21, 36, 0);//前場引け
+$zenba_s = mktime(9, 0, 0);// 前場寄付
+$zenba_e = mktime(11, 30, 0);//前場引け
 $goba_s = mktime(12, 30, 0);//後場寄付
-$goba_e = mktime(21, 37, 0);//後場引け
+$goba_e = mktime(11, 32, 0);//後場引け
 
 $kabus = new Kabucom\Kabus("pub");
 $codes = new Kabucom\Code();
@@ -45,7 +45,7 @@ while (1) {
 		// 最初にAPI銘柄リストをリセット
 		$kabus->removeAll();
         echo $loop . "\n";
-	    sleep(2 * 60); // 5分おき
+	    sleep(3 * 60); // 5分おき
         // SELECT
     }
     if ($this_time > $goba_e) {
