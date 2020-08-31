@@ -40,6 +40,9 @@ while (1) {
         echo $loop . "\n";
 	    sleep(2 * 60); // 5分おき
         // SELECT
+        if ($loop > 4) {
+            $output = [];
+        }
     }
     if ($this_time > $goba_e) {
         break;
