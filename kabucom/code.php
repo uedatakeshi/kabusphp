@@ -8,14 +8,19 @@ use Monolog\Formatter\LineFormatter;
 
 class Code
 {
-    public $codeFile = "list.csv";
+    public $codeFile = "code.csv";// 東証全銘柄
     public $allCode = [];
     public $log;
 
-    function __construct()
+    function __construct($file)
     {
         $this->log = new Logger('app');
         $this->log->pushHandler(new StreamHandler('./log/error.log', Logger::WARNING));
+
+        if ($file == "list100") {
+            $this->codeFile = "list.csv";// 100件抽出したもの
+        }
+
         $this->allCode = $this->getCode();
     }
 

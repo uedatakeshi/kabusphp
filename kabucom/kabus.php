@@ -36,7 +36,6 @@ class Kabus
     public function getsymbol($symbol, $exchange) {
         $param = "/kabusapi/board/" . $symbol . "@" . $exchange;
         $response = $this->sendApi($param);
-        //$this->log->warning("リクエスト", [$param, $response]);
 
         return $response;
     }
@@ -184,7 +183,6 @@ class Kabus
             $pos = strpos($http_response_header[0], '200');
             if ($pos === false) {
                 $this->log->error("リクエスト失敗", [$url, $json]);
-                //exit;
             }
         }
         if (!$json) {
@@ -195,7 +193,6 @@ class Kabus
         $response = json_decode($json, true);
         if ($response['RegistList']) {
             $this->log->error("銘柄登録全解除に失敗しました", [$url]);
-            //exit;
         }
         return true;
     }
