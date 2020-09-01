@@ -16,7 +16,7 @@ for ($i = 4; $i < 38; $i++) {
     $query = <<<END
     SELECT Symbol, loop, CurrentPrice, CurrentPriceTime, vwap, ChangePreviousClosePer, tradingvolume
     FROM items
-    WHERE loop IN ({$loop_in}) 
+    WHERE loop IN ({$loop_in}) and reg_date='2020-09-01'
     ORDER BY symbol, loop DESC 
 END;
     $result = pg_query($query);
@@ -27,6 +27,7 @@ END;
             $vwap = $row['vwap'];
             if (preg_match("/^[0-9]+$/", $row['currentprice'])) {
                 $output[$symbol][$myloop]['price'] = $row['currentprice'];
+                $output[$symbol][$myloop]['time'] = $row['currentpricetime'];
                 $output[$symbol][$myloop]['vwap'] = $row['vwap'];
                 $output[$symbol][$myloop]['changepreviouscloseper'] = $row['changepreviouscloseper'];
                 $output[$symbol][$myloop]['tradingvolume'] = $row['tradingvolume'];
@@ -46,24 +47,26 @@ END;
                 $vdiff3 = $v[$c2]['tradingvolume'] - $v[$c1]['tradingvolume'];
             }
             $prate = 0;
-            if ($v[$c4]['price'] && ($v[$c4]['price'] > 0)) {
+            if (isset($v[$c4]['price']) && ($v[$c4]['price'] > 0)) {
                 $prate = round(100 * $diff1 / $v[$c4]['price'], 2);// 現在価格の上昇率
             }
             $vrate = 0;
-            if ($v[$c4]['tradingvolume'] && ($v[$c4]['tradingvolume'] > 0)) {
+            if (isset($v[$c4]['tradingvolume']) && ($v[$c4]['tradingvolume'] > 0)) {
                 $vrate = round(100 * $vdiff1 / $v[$c4]['tradingvolume'], 2);// 現在出来高の上昇率
             }
             $wrate = 0;
-            if ($v[$c4]['vwap'] && ($v[$c4]['vwap'] > 0)) {
+            if (isset($v[$c4]['vwap']) && ($v[$c4]['vwap'] > 0)) {
                 $wrate = round(100 * $v[$c4]['price'] / $v[$c4]['vwap'], 2);// VWAPの乖離率
             }
 
-            if (($wrate < 100.6) && ($prate > 0.5) && ($diff1 >= $diff2) && ($diff2 >= $diff3) && ($diff3 > 0) && ($vdiff1 > $vdiff2) && ($vdiff2 > $vdiff3) && ($vdiff3 > 0)) {
-                $judge[$c4][$k] = "{$diff1}, {$diff2}, {$diff3}, $prate, {$v[$c4]['price']}, {$v[$c4]['vwap']}, {$wrate}, {$v[$c4]['changepreviouscloseper']}, $vdiff1, $vdiff2, $vdiff3, {$v[$c4]['tradingvolume']}, $vrate";
+            if ( ($diff1 >= $diff2) && ($diff2 >= $diff3) && ($diff3 > 0) && ($vdiff1 > $vdiff2) && ($vdiff2 > $vdiff3) && ($vdiff3 > 0)) {
+                $judge[$c4][$k] = "{$v[$c4]['time']},{$diff1}, {$diff2}, {$diff3}, $prate, {$v[$c4]['price']}, {$v[$c4]['vwap']}, {$wrate}, {$v[$c4]['changepreviouscloseper']}, $vdiff1, $vdiff2, $vdiff3, {$v[$c4]['tradingvolume']}, $vrate";
             }
         }
     }
-    print_r($judge);
+    if (isset($judge)) {
+    	print_r($judge);
+    }
 
 }
 
