@@ -6,6 +6,8 @@ date_default_timezone_set('Asia/Tokyo');
 
 $db = pg_connect("host=localhost dbname=" . DB_NAME. " user=" . DB_USER . " password=" . DB_PASS);
 
+$reg_date = "2020-09-01";
+
 for ($i = 4; $i < 38; $i++) {
 
     $loop_array = range($i, $i - 3);
@@ -16,7 +18,7 @@ for ($i = 4; $i < 38; $i++) {
     $query = <<<END
     SELECT Symbol, loop, CurrentPrice, CurrentPriceTime, vwap, ChangePreviousClosePer, tradingvolume
     FROM items
-    WHERE loop IN ({$loop_in}) and reg_date='2020-09-01'
+    WHERE loop IN ({$loop_in}) and reg_date='{$reg_date}'
     ORDER BY symbol, loop DESC 
 END;
     $result = pg_query($query);
@@ -58,16 +60,15 @@ END;
             if (isset($v[$c4]['vwap']) && ($v[$c4]['vwap'] > 0)) {
                 $wrate = round(100 * $v[$c4]['price'] / $v[$c4]['vwap'], 2);// VWAPの乖離率
             }
-
-            if ( ($diff1 >= $diff2) && ($diff2 >= $diff3) && ($diff3 > 0) && ($vdiff1 > $vdiff2) && ($vdiff2 > $vdiff3) && ($vdiff3 > 0)) {
+	        if (($wrate < 101.6) && ($vrate > 15) && ($prate > 0.5) && ($diff1 > $diff2) && ($diff2 >= $diff3) && ($diff3 > 0) && ($vdiff1 > $vdiff2) && ($vdiff2 > $vdiff3) && ($vdiff3 > 0)) {
                 $judge[$c4][$k] = "{$v[$c4]['time']},{$diff1}, {$diff2}, {$diff3}, $prate, {$v[$c4]['price']}, {$v[$c4]['vwap']}, {$wrate}, {$v[$c4]['changepreviouscloseper']}, $vdiff1, $vdiff2, $vdiff3, {$v[$c4]['tradingvolume']}, $vrate";
             }
         }
     }
-    if (isset($judge)) {
-    	print_r($judge);
-    }
 
 }
 
+if (isset($judge)) {
+    print_r($judge);
+}
 exit;
