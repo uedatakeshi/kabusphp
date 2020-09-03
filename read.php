@@ -18,6 +18,7 @@ $kabus->removeAll();
 $list = $codes->allCode;// 本日の対象銘柄のリスト
 $db = pg_connect("host=localhost dbname=" . DB_NAME. " user=" . DB_USER . " password=" . DB_PASS);
 $loop = 1;
+$ordered = 0;
 while (1) {
     $this_time = time();
     if ((($this_time >= $zenba_s) && ($this_time <= $zenba_e)) || (($this_time >= $goba_s) && ($this_time <= $goba_e))) {
@@ -33,16 +34,25 @@ while (1) {
             $query = insQuery($item, $loop);
             $result = pg_query($query);
             $n++;
+            // select
+            if (($loop >= 4) && ($ordered == 0)) {
+                if ($bidprice = checkOrder($v, $loop)) {
+                    $cash = $kabus->getcash();
+                    if ($cash['StockAccountWallet'] > $bidprice * 100) {
+                        // ここで注文を入れる
+                        // まだテストしていないので仮にダミーのmethodに渡す
+                        //$order_id = $kabus->getsendorder($v, $bidprice);
+                        $order_id = $kabus->dummyOrder($v, $bidprice);
+                        $ordered = 1;
+                    }
+                }
+            }
         }
         $loop++;
 		// API銘柄リストをリセット
 		$kabus->removeAll();
         echo $loop . "\n";
 	    sleep(3 * 60); // 5分おき
-        // SELECT
-        if ($loop > 4) {
-            $output = [];
-        }
     }
     if ($this_time > $goba_e) {
         break;
@@ -51,6 +61,67 @@ while (1) {
 pg_close($db);
 
 exit;
+
+function checkOrder($symbol, $loop) {
+    $loop_array = range($loop, $loop - 3);
+    list($c4, $c3, $c2, $c1) = $loop_array; 
+    $loop_in = implode(",", $loop_array);
+    $today = date("Y-m-d");
+    $output = [];
+    $query = <<<END
+    SELECT 
+        loop, CurrentPrice, CurrentPriceTime, CurrentPriceStatus, BidPrice, vwap, ChangePreviousClosePer, tradingvolume
+    FROM items
+    WHERE symbol='{$symbol}' AND loop IN ({$loop_in}) and reg_date='{$reg_date}'
+    ORDER BY loop DESC 
+END;
+    $result = pg_query($query);
+    if ($result) {
+        while ($row = pg_fetch_array($result, NULL, PGSQL_ASSOC)) {
+            $myloop = $row['loop'];
+            $vwap = $row['vwap'];
+            if (preg_match("/^[0-9]+$/", $row['currentprice'])) {
+                $output[$myloop]['price'] = $row['currentprice'];
+                $output[$myloop]['bidprice'] = $row['bidprice'];
+                $output[$myloop]['time'] = $row['currentpricetime'];
+                $output[$myloop]['currentpricestatus'] = $row['currentpricestatus'];
+                $output[$myloop]['vwap'] = $row['vwap'];
+                $output[$myloop]['changepreviouscloseper'] = $row['changepreviouscloseper'];
+                $output[$myloop]['tradingvolume'] = $row['tradingvolume'];
+            }
+        }
+    }
+    $currentpricestatus = $output[$c4]['currentpricestatus'];
+    $bidprice = $output[$c4]['bidprice'];
+    if (isset($output[$c4]['price']) && isset($output[$c3]['price'])) {
+        $diff1 = $output[$c4]['price'] - $output[$c3]['price'];
+        $vdiff1 = $output[$c4]['tradingvolume'] - $output[$c3]['tradingvolume'];
+    }
+    if (isset($output[$c3]['price']) && isset($output[$c2]['price'])) {
+        $diff2 = $output[$c3]['price'] - $output[$c2]['price'];
+        $vdiff2 = $output[$c3]['tradingvolume'] - $output[$c2]['tradingvolume'];
+    }
+    if (isset($output[$c2]['price']) && isset($output[$c1]['price'])) {
+        $diff3 = $output[$c2]['price'] - $output[$c1]['price'];
+        $vdiff3 = $output[$c2]['tradingvolume'] - $output[$c1]['tradingvolume'];
+    }
+    $prate = 0;
+    if (isset($output[$c4]['price']) && ($output[$c4]['price'] > 0)) {
+        $prate = round(100 * $diff1 / $output[$c4]['price'], 2);// 現在価格の上昇率
+    }
+    $vrate = 0;
+    if (isset($output[$c4]['tradingvolume']) && ($output[$c4]['tradingvolume'] > 0)) {
+        $vrate = round(100 * $vdiff1 / $output[$c4]['tradingvolume'], 2);// 現在出来高の上昇率
+    }
+    $wrate = 0;
+    if (isset($output[$c4]['vwap']) && ($output[$c4]['vwap'] > 0)) {
+        $wrate = round(100 * $output[$c4]['price'] / $output[$c4]['vwap'], 2);// VWAPの乖離率
+    }
+    if (($wrate < 101.6) && ($vrate > 15) && ($vrate < 50) && ($prate > 0.5) && ($diff1 > $diff2) && ($diff2 >= $diff3) && ($diff3 > 0) && ($vdiff1 > $vdiff2) && ($vdiff2 > $vdiff3) && ($vdiff3 > 0) && ($currentpricestatus == 1)) {
+        return $bidprice;
+    }
+    return false;
+}
 
 function insQuery($item, $loop) {
 

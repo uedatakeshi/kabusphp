@@ -43,7 +43,7 @@ class Kabus
     // 取引余力（現物）
     // StockAccountWallet
     public function getcash() {
-        $param = "/wallet/cash";
+        $param = "/kabusapi/wallet/cash";
         $response = $this->sendApi($param);
 
         return $response;
@@ -65,19 +65,41 @@ class Kabus
         return $response;
     }
 
+    // dummy注文発注
+    public function dummyOrder($symbol, $price, $side='2', $qty=100, $expireday=date("Ymd"), $frontordertype=27) {
+        $data = [
+            'Password' => $this->order_password,
+            'Symbol' => $symbol,
+            'Exchange' => 1,
+            'SecurityType' => 1,
+            'Side' => '{$side}',// 1:売 2:買
+            'CashMargin' => 1,
+            'DelivType' => 2,// 受渡区分 お預り金
+            'FundType' => 'AA',// 資産区分 信用代用
+            'AccountType' => 4,// 口座種別 特定
+            'Qty' => $qty,
+            'Price' => $price,
+            'ExpireDay' => $expireday,
+            'FrontOrderType' => $frontordertype,
+        ];
+        $this->log->warning("テスト注文", [$data]);
+
+        return "123456";
+    }
+
     // 注文発注
-    public function getsendorder($symbol, $side, $qty, $price, $expireday, $frontordertype) {
+    public function getsendorder($symbol, $price, $side='2', $qty=100, $expireday=date("Ymd"), $frontordertype=27) {
         $url = "http://localhost:" . $this->port . "/sendorder";
         $data = [
             'Password' => $this->order_password,
             'Symbol' => $symbol,
             'Exchange' => 1,
             'SecurityType' => 1,
-            'Side' => '{$side}',
+            'Side' => '{$side}',// 1:売 2:買
             'CashMargin' => 1,
-            'DelivType' => 1,// 受渡区分 分からない
-            'FundType' => '  ',// 資産区分 分からない
-            'AccountType' => 1,// 口座種別 分からない
+            'DelivType' => 2,// 受渡区分 お預り金
+            'FundType' => 'AA',// 資産区分 信用代用
+            'AccountType' => 4,// 口座種別 特定
             'Qty' => $qty,
             'Price' => $price,
             'ExpireDay' => $expireday,
