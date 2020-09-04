@@ -66,7 +66,8 @@ class Kabus
     }
 
     // dummy注文発注
-    public function dummyOrder($symbol, $price, $side='2', $qty=100, $expireday=date("Ymd"), $frontordertype=27) {
+    public function dummyOrder($symbol, $price, $side='2', $qty=100, $frontordertype=27) {
+    	$expireday = date("Ymd");
         $data = [
             'Password' => $this->order_password,
             'Symbol' => $symbol,
@@ -88,7 +89,7 @@ class Kabus
     }
 
     // 注文発注
-    public function getsendorder($symbol, $price, $side='2', $qty=100, $expireday=date("Ymd"), $frontordertype=27) {
+    public function getsendorder($symbol, $price, $side='2', $qty=100, $expireday, $frontordertype=27) {
         $url = "http://localhost:" . $this->port . "/sendorder";
         $data = [
             'Password' => $this->order_password,

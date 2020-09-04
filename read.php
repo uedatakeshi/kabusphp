@@ -66,7 +66,7 @@ function checkOrder($symbol, $loop) {
     $loop_array = range($loop, $loop - 3);
     list($c4, $c3, $c2, $c1) = $loop_array; 
     $loop_in = implode(",", $loop_array);
-    $today = date("Y-m-d");
+    $reg_date = date("Y-m-d");
     $output = [];
     $query = <<<END
     SELECT 
@@ -91,8 +91,16 @@ END;
             }
         }
     }
-    $currentpricestatus = $output[$c4]['currentpricestatus'];
-    $bidprice = $output[$c4]['bidprice'];
+    if (isset($output[$c4]['currentpricestatus'])) {
+    	$currentpricestatus = $output[$c4]['currentpricestatus'];
+    } else {
+    	return false;
+    }
+    if (isset($output[$c4]['bidprice'])) {
+    	$bidprice = $output[$c4]['bidprice'];
+    } else {
+    	return false;
+    }
     if (isset($output[$c4]['price']) && isset($output[$c3]['price'])) {
         $diff1 = $output[$c4]['price'] - $output[$c3]['price'];
         $vdiff1 = $output[$c4]['tradingvolume'] - $output[$c3]['tradingvolume'];
