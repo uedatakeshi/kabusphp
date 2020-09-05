@@ -11,6 +11,12 @@ $goba_e = mktime(11, 32, 0);//後場引け
 $kabus = new Kabucom\Kabus("pub");
 $codes = new Kabucom\Code("list100");
 echo $kabus->apikey . "\n";
+//$cash = $kabus->getcash();
+//echo $cash['StockAccountWallet'] . "\n";
+//$order_id = $kabus->dummyOrder("1234", 100);
+//$order_id = $kabus->getsendorder("8550", 213);
+
+exit;
 
 // 最初にAPI銘柄リストをリセット
 $kabus->removeAll();
