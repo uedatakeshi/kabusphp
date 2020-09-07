@@ -16,7 +16,7 @@ echo $kabus->apikey . "\n";
 //$order_id = $kabus->dummyOrder("1234", 100);
 //$order_id = $kabus->getsendorder("8550", 213);
 
-exit;
+//exit;
 
 // 最初にAPI銘柄リストをリセット
 $kabus->removeAll();
