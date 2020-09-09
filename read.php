@@ -48,8 +48,8 @@ while (1) {
                     if ($cash['StockAccountWallet'] > $bidprice * 100) {
                         // ここで注文を入れる
                         // まだテストしていないので仮にダミーのmethodに渡す
-                        //$order_id = $kabus->getsendorder($v, $bidprice);
-                        $order_id = $kabus->dummyOrder($v, $bidprice);
+                        $order_id = $kabus->getsendorder($v, $bidprice);
+                        //$order_id = $kabus->dummyOrder($v, $bidprice);
                         $ordered = 1;
                     }
                 }
