@@ -54,6 +54,10 @@ while (1) {
                     }
                 }
             }
+            if ($ordered == 1) {
+                // 注文約定照会getorders
+                $orders = $kabus->getorders();
+            }
         }
         $loop++;
 		// API銘柄リストをリセット

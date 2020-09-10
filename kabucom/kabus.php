@@ -58,8 +58,8 @@ class Kabus
     }
 
     // 注文約定照会
-    public function getorders($product=0) {
-        $param = "/orders?product=" . $product;
+    public function getorders($product=1) {
+        $param = "/kabusapi/orders?product=" . $product;
         $response = $this->sendApi($param);
 
         return $response;
