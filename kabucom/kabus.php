@@ -66,7 +66,7 @@ class Kabus
     }
 
     // dummy注文発注
-    public function dummyOrder($symbol, $price, $side='2', $qty=100, $frontordertype=27) {
+    public function dummyOrder($symbol, $price, $side='2', $delivtype=2, $fundtype='AA', $qty=100, $frontordertype=27) {
     	$expireday = date("Ymd");
         $data = [
             'Password' => $this->order_password,
@@ -75,8 +75,8 @@ class Kabus
             'SecurityType' => 1,
             'Side' => $side,// 1:売 2:買
             'CashMargin' => 1,
-            'DelivType' => 2,// 受渡区分 お預り金
-            'FundType' => 'AA',// 資産区分 信用代用
+            'DelivType' => $delivtype,// 受渡区分 買い2:お預り金 売り0 指定なし
+            'FundType' => $fundtype,// 資産区分 信用代用 売りは'  '半角スペース2つ
             'AccountType' => 4,// 口座種別 特定
             'Qty' => $qty,
             'Price' => $price,
@@ -89,7 +89,7 @@ class Kabus
     }
 
     // 注文発注
-    public function getsendorder($symbol, $price, $side='2', $qty=100, $frontordertype=27) {
+    public function getsendorder($symbol, $price, $side='2', $delivtype=2, $fundtype='AA', $qty=100, $frontordertype=27) {
         $url = "http://localhost:" . $this->port . "/kabusapi/sendorder";
     	$expireday = date("Ymd");
     	//$expireday = "20200907";
@@ -100,13 +100,13 @@ class Kabus
             'SecurityType' => 1,
             'Side' => $side,// 1:売 2:買
             'CashMargin' => 1,
-            'DelivType' => 2,// 受渡区分 お預り金
-            'FundType' => 'AA',// 資産区分 信用代用
+            'DelivType' => $delivtype,// 受渡区分 買い2:お預り金 売り0 指定なし
+            'FundType' => $fundtype,// 資産区分 信用代用 売りは'  '半角スペース2つ
             'AccountType' => 4,// 口座種別 特定
             'Qty' => $qty,
             'Price' => $price,
             'ExpireDay' => $expireday,
-            'FrontOrderType' => $frontordertype,
+            'FrontOrderType' => $frontordertype,// 25:不成（前場）
         ];
         $opts = [
             'http' => [

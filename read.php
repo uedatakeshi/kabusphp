@@ -25,7 +25,8 @@ $list = $codes->allCode;// 本日の対象銘柄のリスト
 $db = pg_connect("host=localhost dbname=" . DB_NAME. " user=" . DB_USER . " password=" . DB_PASS);
 
 $loop = 1;
-$ordered = 0;
+$orderbuys = [];
+$ordersell = [];
 while (1) {
     $this_time = time();
     if ((($this_time >= $zenba_s) && ($this_time <= $zenba_e)) || (($this_time >= $goba_s) && ($this_time <= $goba_e))) {
@@ -42,21 +43,33 @@ while (1) {
             $result = pg_query($query);
             $n++;
             // select
-            if (($loop >= 4) && ($ordered == 0)) {
+            if ($loop >= 4) {
                 if ($bidprice = checkOrder($v, $loop)) {
                     $cash = $kabus->getcash();
                     if ($cash['StockAccountWallet'] > $bidprice * 100) {
                         // ここで注文を入れる
+                        $orderbuys[$v] = $kabus->getsendorder($v, $bidprice);
                         // まだテストしていないので仮にダミーのmethodに渡す
-                        $order_id = $kabus->getsendorder($v, $bidprice);
-                        //$order_id = $kabus->dummyOrder($v, $bidprice);
-                        $ordered = 1;
+                        //$orderbuys[$v] = $kabus->dummyOrder($v, $bidprice);
                     }
                 }
             }
-            if ($ordered == 1) {
+            if (isset($orderbuys[$v]) && $orderbuys[$v]) {
                 // 注文約定照会getorders
                 $orders = $kabus->getorders();
+                foreach ($orders as $val) {
+                    if (($val['Symbol'] == $v) && ($val['ID'] == $orderbuys[$v])) {
+                        if (($val['State'] == 5) && ($val['OrderState'] == 5)) {
+                            $sellPrice = intval($val['Price'] * 1.03);
+                            $sellQty = $val['CumQty'];
+                            // ここで売り処理
+                            $ordersell[$v] = $kabus->getsendorder($v, $sellPrice, '1', 0, '  ', $sellQty, 25);
+                            //$ordersell[$v] = $kabus->dummyOrder($v, $sellPrice, '1', 0, '  ', $sellQty, 25);
+                            unset($orderbuys[$v]);
+                            break;
+                        }
+                    }
+                }
             }
         }
         $loop++;
