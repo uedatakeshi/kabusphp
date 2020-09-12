@@ -15,6 +15,7 @@ echo $kabus->apikey . "\n";
 //echo $cash['StockAccountWallet'] . "\n";
 //$order_id = $kabus->dummyOrder("1234", 100);
 //$order_id = $kabus->getsendorder("8550", 213);
+//$order_id = $kabus->getsendorder("8550", 213, '1', 0, '  ', 100, 25);
 
 //exit;
 
@@ -270,6 +271,7 @@ function calcFourth($output, $loop_array) {
     } else {
         return false;
     }
+    /*
     if (isset($output[$c4]['time']) && preg_match("/^(\d+)-(\d+)-(\d+) (\d+):(\d+):(\d+)/", $output[$c4]['time'], $regs)) {
         $h = $regs[4];
         $m = $regs[5];
@@ -281,6 +283,7 @@ function calcFourth($output, $loop_array) {
     } else {
         return false;
     }
+    */
     if (isset($output[$c4]['openingprice'])) {
         if ($output[$c4]['price'] < $output[$c4]['openingprice']) {
             return false;

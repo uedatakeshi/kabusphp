@@ -6,7 +6,7 @@ date_default_timezone_set('Asia/Tokyo');
 
 $db = pg_connect("host=localhost dbname=" . DB_NAME. " user=" . DB_USER . " password=" . DB_PASS);
 
-$reg_date = "2020-09-09";
+$reg_date = "2020-09-03";
 
 
 for ($i = 4; $i < 38; $i++) {
@@ -112,6 +112,7 @@ function calcFourth($output, $loop_array) {
     } else {
         return false;
     }
+    /*
     if (isset($output[$c4]['time']) && preg_match("/^(\d+)-(\d+)-(\d+) (\d+):(\d+):(\d+)/", $output[$c4]['time'], $regs)) {
         $h = $regs[4];
         $m = $regs[5];
@@ -123,6 +124,7 @@ function calcFourth($output, $loop_array) {
     } else {
         return false;
     }
+    */
     if (isset($output[$c4]['openingprice'])) {
         if ($output[$c4]['price'] < $output[$c4]['openingprice']) {
             return false;
@@ -130,10 +132,17 @@ function calcFourth($output, $loop_array) {
     } else {
         return false;
     }
+    $lrate = 0;
+    if (isset($output[$c4]['lowprice'])) {
+        $lrate = 100 * ($output[$c4]['price'] - $output[$c4]['lowprice']) / $output[$c4]['lowprice'];
+    } else {
+        return false;
+    }
 
     if (($diff1 > $diff2) && ($diff2 >= $diff3) && ($diff3 > 0)) {
         if (($vdiff1 > $vdiff2) && ($vdiff2 > $vdiff3) && ($vdiff1 > 10000)) {
-            if (($wrate < 101.6) && ($prate > 0.4) && ($drate > 1)) {
+//            if (($wrate < 101.6) && ($prate > 0.4) && ($lrate > 1)) {
+            if (($wrate < 101.6) && ($prate > 0.4)) {
 
                 //return $bidprice;
                 return "{$output[$c4]['time']}," . 
@@ -142,7 +151,7 @@ function calcFourth($output, $loop_array) {
                     "{$output[$c4]['openingprice']}, {$output[$c4]['lowprice']}, " .
                     "{$output[$c4]['vwap']}, {$wrate}, " . 
                     "{$output[$c4]['changepreviouscloseper']}, " .
-                    "$vdiff1, $vdiff2, $vdiff3, {$output[$c4]['tradingvolume']}, $vrate";
+                    "$vdiff1, $vdiff2, $vdiff3, {$output[$c4]['tradingvolume']}, $vrate, $lrate";
 
             }
         }
