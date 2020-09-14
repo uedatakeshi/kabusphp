@@ -64,8 +64,8 @@ while (1) {
                             $sellPrice = intval($val['Price'] * 1.03);
                             $sellQty = $val['CumQty'];
                             // ここで売り処理
-                            $ordersell[$v] = $kabus->getsendorder($v, $sellPrice, '1', 0, '  ', $sellQty, 25);
-                            //$ordersell[$v] = $kabus->dummyOrder($v, $sellPrice, '1', 0, '  ', $sellQty, 25);
+                            $ordersell[$v] = $kabus->getsendorder($v, $sellPrice, '1', 0, '  ', $sellQty, 26);
+                            //$ordersell[$v] = $kabus->dummyOrder($v, $sellPrice, '1', 0, '  ', $sellQty, 26);
                             unset($orderbuys[$v]);
                             break;
                         }
