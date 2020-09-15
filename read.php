@@ -63,7 +63,7 @@ while (1) {
                         if (($val['State'] == 5) && ($val['OrderState'] == 5)) {
                             $sellPrice = intval($val['Price'] * 1.03);
                             $sellQty = $val['CumQty'];
-                            // ここで売り処理
+                            // ここで売り処理 26:不成（後場) 25:不成（前場）
                             $ordersell[$v] = $kabus->getsendorder($v, $sellPrice, '1', 0, '  ', $sellQty, 26);
                             //$ordersell[$v] = $kabus->dummyOrder($v, $sellPrice, '1', 0, '  ', $sellQty, 26);
                             unset($orderbuys[$v]);
