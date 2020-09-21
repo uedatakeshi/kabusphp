@@ -11,6 +11,7 @@ $goba_e = mktime(15, 0, 0);//後場引け
 $kabus = new Kabucom\Kabus("pub");
 $codes = new Kabucom\Code("list100");
 echo $kabus->apikey . "\n";
+//echo $kabus->getSymbol("7974", 1);
 //$cash = $kabus->getcash();
 //echo $cash['StockAccountWallet'] . "\n";
 //$order_id = $kabus->dummyOrder("1234", 100);
