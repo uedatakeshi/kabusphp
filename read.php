@@ -295,7 +295,7 @@ function calcFourth($output, $loop_array) {
 
     if (($diff1 > $diff2) && ($diff2 >= $diff3) && ($diff3 > 0)) {
         if (($vdiff1 > $vdiff2) && ($vdiff2 > $vdiff3) && ($vdiff1 > 10000)) {
-            if (($wrate < 101.6) && ($prate > 0.4) && ($drate > 1)) {
+            if (($wrate < 102.1) && ($prate > 0.4) && ($drate > 1) && ($output[$c4]['changepreviouscloseper'] > 1)) {
                 return $bidprice;
             }
         }
