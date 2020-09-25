@@ -1,6 +1,17 @@
-<html>
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+</head>
+    <body>
+        ON
+        <input type="text" id="myText">
+        <input type="button"  id="myBtn" value="send">
     <script>
-    var socket = new WebSocket('ws://localhost:18080/kabusapi/websocket');
+    //var socket = new WebSocket('ws://localhost:18080/kabusapi/websocket');
+      var socket = new WebSocket('wss://echo.websocket.org');
+
 
     // 接続時のイベント
     socket.onopen = function (evt) {
@@ -21,5 +32,13 @@
     socket.onerror = function (evt) {
       console.log('Error: ' + evt.data);
     };
-    </script>
 
+    $('#myBtn').on('click', function(e) {
+        var mes = $('#myText').val();
+        socket.send(mes);
+    });
+
+
+    </script>
+    </body>
+</html>
