@@ -6,7 +6,7 @@ date_default_timezone_set('Asia/Tokyo');
 
 $db = pg_connect("host=localhost dbname=" . DB_NAME. " user=" . DB_USER . " password=" . DB_PASS);
 
-$reg_date = "2020-09-23";
+$reg_date = "2020-09-25";
 
 
 for ($i = 4; $i < 77; $i++) {
@@ -142,7 +142,7 @@ function calcFourth($output, $loop_array) {
     if (($diff1 > $diff2) && ($diff2 >= $diff3) && ($diff3 > 0)) {
         if (($vdiff1 > $vdiff2) && ($vdiff2 > $vdiff3) && ($vdiff1 > 10000)) {
 //            if (($wrate < 101.6) && ($prate > 0.4) && ($lrate > 1)) {
-            if (($wrate < 102.1) && ($prate > 0.4) && ($drate > 1) && ($output[$c4]['changepreviouscloseper'] > 1)) {
+            if (($wrate < 102.1) && ($prate > 0.2) && ($drate > 1) && ($output[$c4]['changepreviouscloseper'] > 1)) {
                 
 
                 //return $bidprice;
