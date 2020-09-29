@@ -6,7 +6,7 @@ date_default_timezone_set('Asia/Tokyo');
 
 $db = pg_connect("host=localhost dbname=" . DB_NAME. " user=" . DB_USER . " password=" . DB_PASS);
 
-$reg_date = "2020-09-28";
+$reg_date = "2020-09-29";
 
 
 for ($i = 4; $i < 77; $i++) {
