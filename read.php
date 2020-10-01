@@ -41,7 +41,10 @@ while (1) {
 			}
             $item = $kabus->getSymbol($v, 1);// 東証のみなので全部1
             // 傾き計算
-            $ans = calcKatamuki($reg_date, $v, $loop, $item);
+            $ans = array();
+            if ($loop >= 4) {
+                $ans = calcKatamuki($reg_date, $v, $loop, $item);
+            }
             // INS
             $query = insQuery($item, $loop, $ans);
             $result = pg_query($query);
@@ -102,7 +105,7 @@ function checkOrder($symbol, $loop) {
         Symbol, 
         loop, CurrentPrice, CurrentPriceTime, CurrentPriceStatus, 
         BidPrice, vwap, ChangePreviousClosePer, tradingvolume, 
-        openingprice, lowprice
+        openingprice, lowprice, inclination, intercept
     FROM items
     WHERE symbol='{$symbol}' AND loop IN ({$loop_in}) and reg_date='{$reg_date}'
     ORDER BY loop DESC 
@@ -122,6 +125,8 @@ END;
                 $output[$myloop]['tradingvolume'] = $row['tradingvolume'];
                 $output[$myloop]['openingprice'] = $row['openingprice'];
                 $output[$myloop]['lowprice'] = $row['lowprice'];
+                $output[$myloop]['inclination'] = $row['inclination'];
+                $output[$myloop]['intercept'] = $row['intercept'];
             }
         }
     }
@@ -141,8 +146,13 @@ function insQuery($item, $loop, $ans) {
             }
         }
     }
-    $inclination = $ans['A'];
-    $intercept = $ans['B'];
+    if ($ans) {
+        $inclination = "'" . $ans['A'] . "'";
+        $intercept = "'" . $ans['B'] . "'";
+    } else {
+        $inclination = "null";
+        $intercept = "null";
+    }
 
     $query = <<<END
     INSERT INTO items (
@@ -239,6 +249,24 @@ function calcFourth($output, $loop_array) {
     } else {
     	return false;
     }
+
+    // 傾き１差分
+    if (isset($output[$c4]['inclination']) && isset($output[$c3]['inclination'])) {
+        $k_diff1 = $output[$c4]['inclination'] - $output[$c3]['inclination'];
+    } else {
+        return false;
+    }
+    if (isset($output[$c3]['inclination']) && isset($output[$c2]['inclination'])) {
+        $k_diff2 = $output[$c3]['inclination'] - $output[$c2]['inclination'];
+    } else {
+        return false;
+    }
+    if (isset($output[$c2]['inclination']) && isset($output[$c1]['inclination'])) {
+        $k_diff3 = $output[$c2]['inclination'] - $output[$c1]['inclination'];
+    } else {
+        return false;
+    }// 傾きここまで
+
     if (isset($output[$c4]['price']) && isset($output[$c3]['price'])) {
         $diff1 = $output[$c4]['price'] - $output[$c3]['price'];
         $vdiff1 = $output[$c4]['tradingvolume'] - $output[$c3]['tradingvolume'];
@@ -280,19 +308,6 @@ function calcFourth($output, $loop_array) {
     } else {
         return false;
     }
-    /*
-    if (isset($output[$c4]['time']) && preg_match("/^(\d+)-(\d+)-(\d+) (\d+):(\d+):(\d+)/", $output[$c4]['time'], $regs)) {
-        $h = $regs[4];
-        $m = $regs[5];
-        $b = $regs[6];
-        $c_time = mktime($h, $m, $b);
-        if ($c_time > $j_time) {
-            return false;
-        }
-    } else {
-        return false;
-    }
-    */
     if (isset($output[$c4]['openingprice'])) {
         if ($output[$c4]['price'] < $output[$c4]['openingprice']) {
             return false;
@@ -301,7 +316,8 @@ function calcFourth($output, $loop_array) {
         return false;
     }
 
-    if (($diff1 > $diff2) && ($diff2 >= $diff3) && ($diff3 > 0)) {
+    if (($output[$c4]['inclination'] > 0) && ($k_diff1 > $k_diff2) && ($k_diff2 > $k_diff3) && ($k_diff2 > 0) && ($k_diff3 > 0)) {
+    //if (($diff1 > $diff2) && ($diff2 >= $diff3) && ($diff3 > 0)) {
         if (($vdiff1 > $vdiff2) && ($vdiff2 > $vdiff3) && ($vdiff1 > 10000)) {
             if (($wrate < 102.1) && ($prate > 0.2) && ($drate > 1) && ($output[$c4]['changepreviouscloseper'] > 1)) {
                 return $bidprice;
