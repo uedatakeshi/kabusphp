@@ -22,7 +22,7 @@ if ($result) {
         $sarray[] = $row['symbol'];
     }
 }
-$fp = fopen('result.txt', 'w');
+$fp = fopen('result' . $reg_date . '.txt', 'w');
 //$sarray = array('1447', '2931');
 //for ($i = 4; $i < 77; $i++) {
 foreach ($sarray as $sym) {
@@ -67,7 +67,7 @@ END;
                 if ($f = calcKatamuki($v)) {
                     //foreach ($res as $v) {
                     //echo "{$f['k']},{$f['t']},{$f['A']},{$f['B']},{$f['p']},{$f['s']},\n";
-                    fwrite($fp, "{$f['k']},{$f['t']},{$f['A']},{$f['B']},{$f['p']},{$f['s']},\n");
+                    fwrite($fp, "{$f['t']},{$f['k']},{$f['A']},{$f['p']},{$f['B']},{$f['s']},\n");
                     //}
                     //$judge[$i][$k] = $res;
                 }
@@ -88,7 +88,7 @@ function calcKatamuki($output) {
     // プロット数
     $num = count($output);
     $first_key = key(array_slice($output, -1, 1, true));
-    $B = $output[$first_key]['price'];
+    $B = $output[$first_key]['openingprice'];
     //echo $B . "\n";
     // Xの平均
     $sumX = 0;
