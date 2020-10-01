@@ -40,8 +40,10 @@ while (1) {
 		        sleep(1);
 			}
             $item = $kabus->getSymbol($v, 1);// 東証のみなので全部1
+            // 傾き計算
+            $ans = calcKatamuki($reg_date, $v, $loop, $item);
             // INS
-            $query = insQuery($item, $loop);
+            $query = insQuery($item, $loop, $ans);
             $result = pg_query($query);
             $n++;
             // select
@@ -127,7 +129,7 @@ END;
     return calcFourth($output, $loop_array);
 }
 
-function insQuery($item, $loop) {
+function insQuery($item, $loop, $ans) {
 
     $today = date("Y-m-d");
     foreach ($item as $k => $v) {
@@ -139,6 +141,8 @@ function insQuery($item, $loop) {
             }
         }
     }
+    $inclination = $ans['A'];
+    $intercept = $ans['B'];
 
     $query = <<<END
     INSERT INTO items (
@@ -175,7 +179,9 @@ function insQuery($item, $loop) {
         MarketOrderBuyQty,
         OverSellQty,
         UnderBuyQty,
-        TotalMarketValue 
+        TotalMarketValue, 
+        inclination,
+        intercept
     ) VALUES (
         '{$today}',
         $loop,
@@ -210,7 +216,9 @@ function insQuery($item, $loop) {
         {$item['MarketOrderBuyQty']},
         {$item['OverSellQty']},
         {$item['UnderBuyQty']},
-        {$item['TotalMarketValue']} 
+        {$item['TotalMarketValue']},
+        $inclination,
+        $intercept
     ) 
 END;
 
@@ -303,5 +311,67 @@ function calcFourth($output, $loop_array) {
 
     return false;
 
+}
+
+
+function calcKatamuki($reg_date, $symbol, $loop, $item) {
+    $output[$loop]['price'] = $item['currentprice'];
+    $output[$loop]['openingprice'] = $item['openingprice'];
+
+    $query = <<<END
+    SELECT 
+        loop, CurrentPrice, openingprice 
+    FROM items
+    WHERE reg_date='{$reg_date}' AND  loop < $loop AND Symbol = '{$symbol}' 
+    ORDER BY loop DESC 
+END;
+    $result = pg_query($query);
+    if ($result) {
+        while ($row = pg_fetch_array($result, NULL, PGSQL_ASSOC)) {
+            $myloop = $row['loop'];
+            if (preg_match("/^[0-9]+$/", $row['currentprice'])) {
+                $output[$myloop]['price'] = $row['currentprice'];
+                $output[$myloop]['openingprice'] = $row['openingprice'];
+            }
+        }
+    }
+
+//print_r($output);
+    // プロット数
+    $num = count($output);
+    $first_key = key(array_slice($output, -1, 1, true));
+    $B = $output[$first_key]['openingprice'];
+    // Xの平均
+    $sumX = 0;
+    $sumY = 0;
+    $sumXY = 0;
+    $bunX = 0;
+    foreach ($output as $k => $v) {
+        $sumX = $sumX + $k;
+        $sumY = $sumY + $v['price'] ;
+        $sumXY = $sumXY + $k * ($v['price'] );
+    }
+    $aveX = $sumX / $num;
+    $aveY = $sumY / $num;
+    $aveXY = $sumXY / $num;
+    $last_key = key(array_slice($output, 0, 1, true));
+    $covXY = $aveXY - $aveX * $aveY;
+    foreach ($output as $k => $v) {
+        $bunX = $bunX + pow(($aveX - $k), 2);
+    }
+    $henX = $bunX / $num;
+    if ($henX == 0) {
+        return false;
+    }
+    //echo "$last_key, {$output[$last_key]['time']}, {$output[$last_key]['price']}, $aveX, $aveY, $aveXY, $henX" . "\n";
+    $ans['k'] = $last_key;
+    $ans['t'] = $output[$last_key]['time'];
+    $ans['A'] = number_format($covXY / $henX, 1);
+    $ans['B'] = number_format($aveY - $ans['A'] * $aveX, 1);
+    $ans['p'] = $output[$last_key]['price'];
+    $ans['s'] = $B;
+    //print_r($ans);
+
+    return $ans;
 }
 

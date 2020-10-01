@@ -74,7 +74,11 @@ MarketOrderSellQty double precision,
 MarketOrderBuyQty double precision,
 OverSellQty double precision,
 UnderBuyQty double precision,
-TotalMarketValue double precision
+TotalMarketValue double precision,
+inclination double precision,
+intercept double precision
 );
 
+ALTER TABLE items add column inclination double precision;
+ALTER TABLE items add column intercept double precision;
 

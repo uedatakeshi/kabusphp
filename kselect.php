@@ -6,8 +6,7 @@ date_default_timezone_set('Asia/Tokyo');
 
 $db = pg_connect("host=localhost dbname=" . DB_NAME. " user=" . DB_USER . " password=" . DB_PASS);
 
-$reg_date = "2020-09-25";
-
+$reg_date = "2020-09-30";
 
 $query = <<<END
     SELECT 
@@ -26,8 +25,10 @@ $fp = fopen('result' . $reg_date . '.txt', 'w');
 //$sarray = array('1447', '2931');
 //for ($i = 4; $i < 77; $i++) {
 foreach ($sarray as $sym) {
+    //echo "$sym, \n";
     fwrite($fp, $sym . "\n");
     for ($i = 4; $i < 40; $i++) {
+        //echo "$i, \n";
 
         $loop_array = range($i, $i - 3);
         list($c4, $c3, $c2, $c1) = $loop_array; 
@@ -43,7 +44,6 @@ foreach ($sarray as $sym) {
     FROM items
     WHERE reg_date='{$reg_date}' AND  loop < $i AND Symbol = '{$sym}' 
     ORDER BY symbol, loop DESC 
-    LIMIT 3
 END;
         $result = pg_query($query);
         if ($result) {
@@ -69,17 +69,42 @@ END;
                     //echo "{$f['k']},{$f['t']},{$f['A']},{$f['B']},{$f['p']},{$f['s']},\n";
                     fwrite($fp, "{$f['t']},{$f['k']},{$f['A']},{$f['p']},{$f['B']},{$f['s']},\n");
                     //}
-                    //$judge[$i][$k] = $res;
+                    $judge[$k][$i]['k'] = $f['A'];
+                    $judge[$k][$i]['t'] = $f['t'];
+                    $judge[$k][$i]['p'] = $f['p'];
                 }
             }
         }
-
+        if (isset($judge[$sym])) {
+            $ans = judge_kei($judge[$sym], $i);
+            if ($ans) {
+                echo "$sym, \n";
+                echo $ans;
+                break;
+            }
+        }
     }
 }
 fclose($fp);
 
 if (isset($judge)) {
-    //print_r($judge);
+   // print_r($judge);
+}
+function judge_kei($judge, $i) {
+    if (!isset($judge[$i]['k']) || !isset($judge[$i -1]['k']) || !isset($judge[$i -2]['k']) || !isset($judge[$i -3]['k'])) {
+        return false;
+    }
+    if (!is_numeric($judge[$i]['k'])) {
+        return false;
+    }
+    $diff1 = $judge[$i]['k'] - $judge[$i -1]['k'];
+    $diff2 = $judge[$i -1]['k'] - $judge[$i -2]['k'];
+    $diff3 = $judge[$i -2]['k'] - $judge[$i -3]['k'];
+    if (($judge[$i]['k'] > 0) && ($diff1 > $diff2) && ($diff2 > $diff3) && ($diff2 > 0) && ($diff3 > 0)) {
+        $ans = "$i, $diff1, $diff2, $diff3, {$judge[$i]['t']}, {$judge[$i]['p']}\n";
+        return $ans;
+    }
+    return false;
 }
 
 function calcKatamuki($output) {
@@ -109,6 +134,9 @@ function calcKatamuki($output) {
         $bunX = $bunX + pow(($aveX - $k), 2);
     }
     $henX = $bunX / $num;
+    if ($henX == 0) {
+        return false;
+    }
     //echo "$last_key, {$output[$last_key]['time']}, {$output[$last_key]['price']}, $aveX, $aveY, $aveXY, $henX" . "\n";
     $ans['k'] = $last_key;
     $ans['t'] = $output[$last_key]['time'];
@@ -122,3 +150,4 @@ function calcKatamuki($output) {
 }
 
 exit;
+
