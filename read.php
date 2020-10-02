@@ -26,7 +26,9 @@ $kabus->removeAll();
 $list = $codes->allCode;// 本日の対象銘柄のリスト
 $db = pg_connect("host=localhost dbname=" . DB_NAME. " user=" . DB_USER . " password=" . DB_PASS);
 
-$loop = 1;
+$reg_date = date("Y-m-d");
+
+$loop = 4;
 $orderbuys = [];
 $ordersell = [];
 while (1) {
@@ -55,12 +57,13 @@ while (1) {
                     $cash = $kabus->getcash();
                     if ($cash['StockAccountWallet'] > $bidprice * 100) {
                         // ここで注文を入れる
-                        $orderbuys[$v] = $kabus->getsendorder($v, $bidprice);
+                        //$orderbuys[$v] = $kabus->getsendorder($v, $bidprice);
                         // まだテストしていないので仮にダミーのmethodに渡す
-                        //$orderbuys[$v] = $kabus->dummyOrder($v, $bidprice);
+                        $orderbuys[$v] = $kabus->dummyOrder($v, $bidprice);
                     }
                 }
             }
+            /*
             if (isset($orderbuys[$v]) && $orderbuys[$v]) {
                 // 注文約定照会getorders
                 $orders = $kabus->getorders();
@@ -78,6 +81,7 @@ while (1) {
                     }
                 }
             }
+            */
         }
         $loop++;
 		// API銘柄リストをリセット
@@ -331,8 +335,8 @@ function calcFourth($output, $loop_array) {
 
 
 function calcKatamuki($reg_date, $symbol, $loop, $item) {
-    $output[$loop]['price'] = $item['currentprice'];
-    $output[$loop]['openingprice'] = $item['openingprice'];
+    $output[$loop]['price'] = $item['CurrentPrice'];
+    $output[$loop]['openingprice'] = $item['OpeningPrice'];
 
     $query = <<<END
     SELECT 
@@ -381,9 +385,9 @@ END;
     }
     //echo "$last_key, {$output[$last_key]['time']}, {$output[$last_key]['price']}, $aveX, $aveY, $aveXY, $henX" . "\n";
     $ans['k'] = $last_key;
-    $ans['t'] = $output[$last_key]['time'];
-    $ans['A'] = number_format($covXY / $henX, 1);
-    $ans['B'] = number_format($aveY - $ans['A'] * $aveX, 1);
+    //$ans['t'] = $output[$last_key]['time'];
+    $ans['A'] = $covXY / $henX;
+    $ans['B'] = $aveY - $ans['A'] * $aveX;
     $ans['p'] = $output[$last_key]['price'];
     $ans['s'] = $B;
     //print_r($ans);
