@@ -63,31 +63,22 @@ while (1) {
                     }
                 }
             }
-            /*
+            
             if (isset($orderbuys[$v]) && $orderbuys[$v]) {
                 // 注文約定照会getorders
                 $orders = $kabus->getorders();
-                foreach ($orders as $val) {
-                    if (($val['Symbol'] == $v) && ($val['ID'] == $orderbuys[$v])) {
-                        if (($val['State'] == 5) && ($val['OrderState'] == 5)) {
-                            $sellPrice = intval($val['Price'] * 1.03);
-                            $sellQty = $val['CumQty'];
-                            // ここで売り処理 26:不成（後場) 25:不成（前場）
-                            $ordersell[$v] = $kabus->getsendorder($v, $sellPrice, '1', 0, '  ', $sellQty, 26);
-                            //$ordersell[$v] = $kabus->dummyOrder($v, $sellPrice, '1', 0, '  ', $sellQty, 26);
-                            unset($orderbuys[$v]);
-                            break;
-                        }
-                    }
+                if (uriChumon($orders, $orderbuys[$v], $v)) {
+                	unset($orderbuys[$v]);
                 }
             }
-            */
+            
         }
         $loop++;
 		// API銘柄リストをリセット
 		$kabus->removeAll();
         echo $loop . "\n";
-	    sleep(3 * 60); // 5分おき
+        sleep(1);
+	    //sleep(3 * 60); // 5分おき
     }
     if ($this_time > $goba_e) {
         break;
@@ -96,6 +87,24 @@ while (1) {
 pg_close($db);
 
 exit;
+
+function uriChumon($orders, $orderbuy, $symbol) {
+   foreach ($orders as $val) {
+        if (($val['Symbol'] == $symbol) && ($val['ID'] == $orderbuy)) {
+            if (($val['State'] == 5) && ($val['OrderState'] == 5)) {
+                $sellPrice = intval($val['Price'] * 1.03);// ここで値幅制限チェック必要
+                $sellQty = $val['CumQty'];
+                // ここで売り処理 26:不成（後場) 25:不成（前場）
+                $order_id = $kabus->getsendorder($symbol, $sellPrice, '1', 0, '  ', $sellQty, 26);
+                //$ordersell[$v] = $kabus->dummyOrder($symbol, $sellPrice, '1', 0, '  ', $sellQty, 26);
+                if ($order_id) {
+                	return $symbol;
+                }
+                break;
+            }
+        }
+    }
+}
 
 function checkOrder($symbol, $loop) {
     $loop_array = range($loop, $loop - 3);
@@ -356,7 +365,6 @@ END;
         }
     }
 
-//print_r($output);
     // プロット数
     $num = count($output);
     $first_key = key(array_slice($output, -1, 1, true));
@@ -383,14 +391,11 @@ END;
     if ($henX == 0) {
         return false;
     }
-    //echo "$last_key, {$output[$last_key]['time']}, {$output[$last_key]['price']}, $aveX, $aveY, $aveXY, $henX" . "\n";
     $ans['k'] = $last_key;
-    //$ans['t'] = $output[$last_key]['time'];
     $ans['A'] = $covXY / $henX;
     $ans['B'] = $aveY - $ans['A'] * $aveX;
     $ans['p'] = $output[$last_key]['price'];
     $ans['s'] = $B;
-    //print_r($ans);
 
     return $ans;
 }
