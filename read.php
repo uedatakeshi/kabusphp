@@ -57,9 +57,9 @@ while (1) {
                     $cash = $kabus->getcash();
                     if ($cash['StockAccountWallet'] > $bidprice * 100) {
                         // ここで注文を入れる
-                        //$orderbuys[$v] = $kabus->getsendorder($v, $bidprice);
+                        $orderbuys[$v] = $kabus->getsendorder($v, $bidprice);
                         // まだテストしていないので仮にダミーのmethodに渡す
-                        $orderbuys[$v] = $kabus->dummyOrder($v, $bidprice);
+                        //$orderbuys[$v] = $kabus->dummyOrder($v, $bidprice);
                     }
                 }
             }
@@ -321,18 +321,20 @@ function calcFourth($output, $loop_array) {
     } else {
         return false;
     }
+    // 始値
     if (isset($output[$c4]['openingprice'])) {
         if ($output[$c4]['price'] < $output[$c4]['openingprice']) {
             return false;
-       }
+        }
+        $srate = round(100 * $output[$c4]['price'] / $output[$c4]['openingprice'], 2);// VWAPの乖離率
     } else {
         return false;
     }
 
     if (($output[$c4]['inclination'] > 0) && ($k_diff1 > $k_diff2) && ($k_diff2 > $k_diff3) && ($k_diff2 > 0) && ($k_diff3 > 0)) {
     //if (($diff1 > $diff2) && ($diff2 >= $diff3) && ($diff3 > 0)) {
-        if (($vdiff1 > $vdiff2) && ($vdiff2 > $vdiff3) && ($vdiff1 > 10000)) {
-            if (($wrate < 102.1) && ($prate > 0.2) && ($drate > 1) && ($output[$c4]['changepreviouscloseper'] > 1)) {
+        if ((($vdiff1 > $vdiff3) || ($vdiff2 > $vdiff3)) && ($vdiff1 > 10000)) {
+            if (($wrate < 103) && ($prate > 0.1) && ($drate > 1)) {
                 return $bidprice;
             }
         }

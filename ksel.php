@@ -165,7 +165,8 @@ function calcFourth($output, $loop_array) {
     if (isset($output[$c4]['openingprice'])) {
         if ($output[$c4]['price'] < $output[$c4]['openingprice']) {
             return false;
-       }
+        }
+        $srate = round(100 * $output[$c4]['price'] / $output[$c4]['openingprice'], 2);// VWAPの乖離率
     } else {
         return false;
     }
@@ -187,7 +188,7 @@ function calcFourth($output, $loop_array) {
                 $expl = "{$output[$c4]['time']}, $c4, {$incli}, {$output[$c4]['price']}, $intercept, {$output[$c4]['openingprice']}, ";
                 $expl .= "$vdiff1, $vdiff2, $vdiff3, {$output[$c4]['tradingvolume']}, ";
                 $expl .= "{$diff1}, {$diff2}, {$diff3}, $k_diff1, $k_diff2, $k_diff3, ";
-                $expl .= "{$wrate}, {$prate}, {$drate}, $vrate, {$output[$c4]['changepreviouscloseper']}, ";
+                $expl .= "{$wrate}, {$prate}, {$drate}, $vrate, {$output[$c4]['changepreviouscloseper']}, $srate";
 
                 return  $expl;
             }
