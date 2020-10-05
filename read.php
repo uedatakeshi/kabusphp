@@ -99,6 +99,8 @@ function uriChumon($orders, $orderbuy, $symbol) {
                 //$ordersell[$v] = $kabus->dummyOrder($symbol, $sellPrice, '1', 0, '  ', $sellQty, 26);
                 if ($order_id) {
                 	return $symbol;
+                } else {
+                    return false;
                 }
                 break;
             }
