@@ -67,7 +67,7 @@ while (1) {
             if (isset($orderbuys[$v]) && $orderbuys[$v]) {
                 // 注文約定照会getorders
                 $orders = $kabus->getorders();
-                if (uriChumon($orders, $orderbuys[$v], $v)) {
+                if (uriChumon($kabus, $orders, $orderbuys[$v], $v)) {
                 	unset($orderbuys[$v]);
                 }
             }
@@ -88,11 +88,15 @@ pg_close($db);
 
 exit;
 
-function uriChumon($orders, $orderbuy, $symbol) {
+function uriChumon($kabus, $orders, $orderbuy, $symbol) {
    foreach ($orders as $val) {
         if (($val['Symbol'] == $symbol) && ($val['ID'] == $orderbuy)) {
             if (($val['State'] == 5) && ($val['OrderState'] == 5)) {
-                $sellPrice = intval($val['Price'] * 1.03);// ここで値幅制限チェック必要
+                $info = $kabus->getinfo($symbol, 1);// 東証のみなので全部1
+                
+                $sellPrice = $info['UpperLimit'];// 値幅制限
+                //$sellPrice = intval($val['Price'] * 1.03);// ここで値幅制限チェック必要
+                
                 $sellQty = $val['CumQty'];
                 // ここで売り処理 26:不成（後場) 25:不成（前場）
                 $order_id = $kabus->getsendorder($symbol, $sellPrice, '1', 0, '  ', $sellQty, 26);

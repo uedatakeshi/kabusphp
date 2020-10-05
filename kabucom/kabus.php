@@ -40,6 +40,13 @@ class Kabus
         return $response;
     }
 
+    public function getinfo($symbol, $exchange) {
+        $param = "/kabusapi/symbol/" . $symbol . "@" . $exchange;
+        $response = $this->sendApi($param);
+
+        return $response;
+    }
+
     // 取引余力（現物）
     // StockAccountWallet
     public function getcash() {
