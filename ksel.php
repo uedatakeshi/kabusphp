@@ -171,26 +171,28 @@ function calcFourth($output, $loop_array) {
         return false;
     }
 
-    if (($output[$c4]['inclination'] > 0) && ($k_diff1 > $k_diff2) && ($k_diff2 > $k_diff3) && ($k_diff2 > 0) && ($k_diff3 > 0)) {
-        //if (($diff1 > $diff2) && ($diff2 >= $diff3) && ($diff3 > 0)) {
-        if ((($vdiff1 > $vdiff3) || ($vdiff2 > $vdiff3)) && ($vdiff1 > 10000)) {
-            //if (($wrate < 102.1) && ($prate > 0.2) && ($drate > 1) && ($output[$c4]['changepreviouscloseper'] > 1)) {
-            if (($wrate < 103) && ($prate > 0.1) && ($drate > 1)) {
+    if (($output[$c4]['inclination'] > 0) && ($output[$c4]['inclination'] < 2)) {
+        if (($k_diff1 > $k_diff2) && ($k_diff2 > $k_diff3) && ($k_diff2 > 0.001) && ($k_diff3 > 0.001)) {
+            //if (($diff1 > $diff2) && ($diff2 >= $diff3) && ($diff3 > 0)) {
+            if ((($vdiff1 > $vdiff3) || ($vdiff2 > $vdiff3)) && ($vdiff1 > 10000)) {
+                //if (($wrate < 102.1) && ($prate > 0.2) && ($drate > 1) && ($output[$c4]['changepreviouscloseper'] > 1)) {
+                if (($diff3 > 0) && ($wrate < 103) && ($prate > 0.1) && ($drate > 1)) {
 
-                //return $bidprice;
-                $incli = number_format($output[$c4]['inclination'], 1);
-                $intercept = number_format($output[$c4]['intercept'], 1);
-                $k_diff1 = number_format($k_diff1, 2);
-                $k_diff2 = number_format($k_diff2, 2);
-                $k_diff3 = number_format($k_diff3, 2);
+                    //return $bidprice;
+                    $incli = number_format($output[$c4]['inclination'], 1);
+                    $intercept = number_format($output[$c4]['intercept'], 1);
+                    $k_diff1 = number_format($k_diff1, 4);
+                    $k_diff2 = number_format($k_diff2, 4);
+                    $k_diff3 = number_format($k_diff3, 4);
+                    $openingprice = preg_replace("/,/", "", $output[$c4]['openingprice']);
 
+                    $expl = "{$output[$c4]['time']}, $c4, {$incli}, {$output[$c4]['price']}, $intercept, $openingprice, ";
+                    $expl .= "$vdiff1, $vdiff2, $vdiff3, {$output[$c4]['tradingvolume']}, ";
+                    $expl .= "{$diff1}, {$diff2}, {$diff3}, $k_diff1, $k_diff2, $k_diff3, ";
+                    $expl .= "{$wrate}, {$prate}, {$drate}, $vrate, {$output[$c4]['changepreviouscloseper']}, $srate";
 
-                $expl = "{$output[$c4]['time']}, $c4, {$incli}, {$output[$c4]['price']}, $intercept, {$output[$c4]['openingprice']}, ";
-                $expl .= "$vdiff1, $vdiff2, $vdiff3, {$output[$c4]['tradingvolume']}, ";
-                $expl .= "{$diff1}, {$diff2}, {$diff3}, $k_diff1, $k_diff2, $k_diff3, ";
-                $expl .= "{$wrate}, {$prate}, {$drate}, $vrate, {$output[$c4]['changepreviouscloseper']}, $srate";
-
-                return  $expl;
+                    return  $expl;
+                }
             }
         }
     }
