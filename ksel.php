@@ -176,7 +176,7 @@ function calcFourth($output, $loop_array) {
             //if (($diff1 > $diff2) && ($diff2 >= $diff3) && ($diff3 > 0)) {
             if ((($vdiff1 > $vdiff3) || ($vdiff2 > $vdiff3)) && ($vdiff1 > 10000)) {
                 //if (($wrate < 102.1) && ($prate > 0.2) && ($drate > 1) && ($output[$c4]['changepreviouscloseper'] > 1)) {
-                if (($diff3 > 0) && ($wrate < 103) && ($prate > 0.1) && ($drate > 1)) {
+                if (($diff3 > 0) && ($wrate < 103) && ($prate > 0.1) && ($drate > 1) && ($srate < 103)) {
 
                     //return $bidprice;
                     $incli = number_format($output[$c4]['inclination'], 1);
