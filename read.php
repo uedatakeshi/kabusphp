@@ -337,11 +337,12 @@ function calcFourth($output, $loop_array) {
         return false;
     }
 
-    if (($output[$c4]['inclination'] > 0) && ($k_diff1 > $k_diff2) && ($k_diff2 > $k_diff3) && ($k_diff2 > 0) && ($k_diff3 > 0)) {
-    //if (($diff1 > $diff2) && ($diff2 >= $diff3) && ($diff3 > 0)) {
-        if ((($vdiff1 > $vdiff3) || ($vdiff2 > $vdiff3)) && ($vdiff1 > 10000)) {
-            if (($wrate < 103) && ($prate > 0.1) && ($drate > 1)) {
-                return $bidprice;
+    if (($output[$c4]['inclination'] > 0) && ($output[$c4]['inclination'] < 2)) {
+        if (($k_diff1 > $k_diff2) && ($k_diff2 > $k_diff3) && ($k_diff2 > 0.001) && ($k_diff3 > 0.001)) {
+            if ((($vdiff1 > $vdiff3) || ($vdiff2 > $vdiff3)) && ($vdiff1 > 10000)) {
+                if (($diff3 > 0) && ($wrate < 103) && ($prate > 0.1) && ($drate > 1) && ($srate < 103)) {
+                    return $bidprice;
+                }
             }
         }
     }
