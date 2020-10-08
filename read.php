@@ -6,12 +6,12 @@ date_default_timezone_set('Asia/Tokyo');
 $zenba_s = mktime(9, 0, 0);// 前場寄付
 $zenba_e = mktime(11, 30, 0);//前場引け
 $goba_s = mktime(12, 30, 0);//後場寄付
-$goba_e = mktime(15, 0, 0);//後場引け
+$goba_e = mktime(14, 55, 0);//後場引け
 
 $kabus = new Kabucom\Kabus("pub");
 $codes = new Kabucom\Code("list100");
 echo $kabus->apikey . "\n";
-//echo $kabus->getSymbol("7974", 1);
+//print_r( $kabus->getSymbol("7974", 1));
 //$cash = $kabus->getcash();
 //echo $cash['StockAccountWallet'] . "\n";
 //$order_id = $kabus->dummyOrder("1234", 100);
@@ -28,7 +28,7 @@ $db = pg_connect("host=localhost dbname=" . DB_NAME. " user=" . DB_USER . " pass
 
 $reg_date = date("Y-m-d");
 
-$loop = 4;
+$loop = 1;
 $orderbuys = [];
 $ordersell = [];
 while (1) {
