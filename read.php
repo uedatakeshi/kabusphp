@@ -3,6 +3,7 @@ require_once "vendor/autoload.php";
 require_once 'config.php';
 
 date_default_timezone_set('Asia/Tokyo');
+$zenba_b = mktime(8, 56, 0);// 寄付前
 $zenba_s = mktime(9, 0, 0);// 前場寄付
 $zenba_e = mktime(11, 30, 0);//前場引け
 $goba_s = mktime(12, 30, 0);//後場寄付
@@ -28,11 +29,12 @@ for ($i = 0; $i < 2; $i++) {// 認証が切れても再接続を試みる
 	$list = $codes->allCode;// 本日の対象銘柄のリスト
 
 	$loop = 1;
+	$zloop = 1;
 	$orderbuys = [];
 	$ordersell = [];
 	while (1) {
 	    $this_time = time();
-	    if ((($this_time >= $zenba_s) && ($this_time <= $zenba_e)) || (($this_time >= $goba_s) && ($this_time <= $goba_e))) {
+	    if ((($this_time >= $zenba_b) && ($this_time <= $zenba_e)) || (($this_time >= $goba_s) && ($this_time <= $goba_e))) {
 	        $n = 0;
 	        foreach ($list as $k => $v) {
 				if ($n > 49) {
@@ -46,7 +48,7 @@ for ($i = 0; $i < 2; $i++) {// 認証が切れても再接続を試みる
 	            }
 	            // 傾き計算
 	            $ans = array();
-	            if ($loop >= 4) {
+	            if ($zloop >= 4) {
 	                $ans = calcKatamuki($reg_date, $v, $loop, $item);
 	            }
 	            // INS
@@ -54,7 +56,7 @@ for ($i = 0; $i < 2; $i++) {// 認証が切れても再接続を試みる
 	            $result = pg_query($query);
 	            $n++;
 	            // select
-	            if ($loop >= 4) {
+	            if ($zloop >= 4) {
 	                if ($bidprice = checkOrder($v, $loop)) {
 	                    $cash = $kabus->getcash();
 	                    if ($cash['StockAccountWallet'] > $bidprice * 100) {
@@ -73,6 +75,9 @@ for ($i = 0; $i < 2; $i++) {// 認証が切れても再接続を試みる
 	            }
 	        }
 	        $loop++;
+	        if ($this_time >= $zenba_s) {
+	        	$zloop++;
+	        }
 			$kabus->removeAll();// API銘柄リストをリセット
 	        echo $loop . "\n";
 	        sleep(1);//sleep(3 * 60); // 5分おき
@@ -210,7 +215,11 @@ function insQuery($item, $loop, $ans) {
         UnderBuyQty,
         TotalMarketValue, 
         inclination,
-        intercept
+        intercept,
+        AskQty,
+        AskPrice,
+        AskTime,
+        AskSign
     ) VALUES (
         '{$today}',
         $loop,
@@ -247,7 +256,11 @@ function insQuery($item, $loop, $ans) {
         {$item['UnderBuyQty']},
         {$item['TotalMarketValue']},
         $inclination,
-        $intercept
+        $intercept,
+        {$item['AskQty']},
+        {$item['AskPrice']},
+        {$item['AskTime']},
+        {$item['AskSign']}
     ) 
 END;
 
