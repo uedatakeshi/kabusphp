@@ -80,6 +80,7 @@ for ($i = 0; $i < 2; $i++) {// 認証が切れても再接続を試みる
 	        }
 			$kabus->removeAll();// API銘柄リストをリセット
 	        echo $loop . "\n";
+	        //echo $zloop . "\n";
 	        sleep(1);//sleep(3 * 60); // 5分おき
 	    }
 	    if ($this_time > $goba_e) {
