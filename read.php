@@ -3,99 +3,105 @@ require_once "vendor/autoload.php";
 require_once 'config.php';
 
 date_default_timezone_set('Asia/Tokyo');
+$zenba_b = mktime(8, 56, 0);// 寄付前
 $zenba_s = mktime(9, 0, 0);// 前場寄付
 $zenba_e = mktime(11, 30, 0);//前場引け
 $goba_s = mktime(12, 30, 0);//後場寄付
-$goba_e = mktime(15, 0, 0);//後場引け
-
-$kabus = new Kabucom\Kabus("pub");
-$codes = new Kabucom\Code("list100");
-echo $kabus->apikey . "\n";
-//echo $kabus->getSymbol("7974", 1);
-//$cash = $kabus->getcash();
-//echo $cash['StockAccountWallet'] . "\n";
-//$order_id = $kabus->dummyOrder("1234", 100);
-//$order_id = $kabus->getsendorder("8550", 213);
-//$order_id = $kabus->getsendorder("8550", 213, '1', 0, '  ', 100, 25);
-
-//exit;
-
-// 最初にAPI銘柄リストをリセット
-$kabus->removeAll();
-
-$list = $codes->allCode;// 本日の対象銘柄のリスト
+$goba_e = mktime(14, 55, 0);//後場引け
+$reg_date = date("Y-m-d");
 $db = pg_connect("host=localhost dbname=" . DB_NAME. " user=" . DB_USER . " password=" . DB_PASS);
 
-$reg_date = date("Y-m-d");
+for ($i = 0; $i < 2; $i++) {// 認証が切れても再接続を試みる
 
-$loop = 4;
-$orderbuys = [];
-$ordersell = [];
-while (1) {
-    $this_time = time();
-    if ((($this_time >= $zenba_s) && ($this_time <= $zenba_e)) || (($this_time >= $goba_s) && ($this_time <= $goba_e))) {
-        $n = 0;
-        foreach ($list as $k => $v) {
-			if ($n > 49) {
-		        $kabus->removeAll();// 50件たまったら削除
-		        $n = 0;
-		        sleep(1);
-			}
-            $item = $kabus->getSymbol($v, 1);// 東証のみなので全部1
-            // 傾き計算
-            $ans = array();
-            if ($loop >= 4) {
-                $ans = calcKatamuki($reg_date, $v, $loop, $item);
-            }
-            // INS
-            $query = insQuery($item, $loop, $ans);
-            $result = pg_query($query);
-            $n++;
-            // select
-            if ($loop >= 4) {
-                if ($bidprice = checkOrder($v, $loop)) {
-                    $cash = $kabus->getcash();
-                    if ($cash['StockAccountWallet'] > $bidprice * 100) {
-                        // ここで注文を入れる
-                        $orderbuys[$v] = $kabus->getsendorder($v, $bidprice);
-                        // まだテストしていないので仮にダミーのmethodに渡す
-                        //$orderbuys[$v] = $kabus->dummyOrder($v, $bidprice);
-                    }
-                }
-            }
-            
-            if (isset($orderbuys[$v]) && $orderbuys[$v]) {
-                // 注文約定照会getorders
-                $orders = $kabus->getorders();
-                if (uriChumon($kabus, $orders, $orderbuys[$v], $v)) {
-                	unset($orderbuys[$v]);
-                }
-            }
-            
-        }
-        $loop++;
-		// API銘柄リストをリセット
-		$kabus->removeAll();
-        echo $loop . "\n";
-        sleep(1);
-	    //sleep(3 * 60); // 5分おき
-    }
-    if ($this_time > $goba_e) {
-        break;
-    }
+	$kabus = new Kabucom\Kabus("pub");
+	$codes = new Kabucom\Code("list100");
+	echo $kabus->apikey . "\n";
+
+	//print_r( $kabus->getSymbol("7974", 1));
+	//$cash = $kabus->getcash();
+	//echo $cash['StockAccountWallet'] . "\n";
+	//$order_id = $kabus->dummyOrder("1234", 100);
+	//$order_id = $kabus->getsendorder("8550", 213);
+	//$order_id = $kabus->getsendorder("8550", 213, '1', 0, '  ', 100, 25);
+	//exit;
+
+	$kabus->removeAll();// 最初にAPI銘柄リストをリセット
+	$list = $codes->allCode;// 本日の対象銘柄のリスト
+
+	$loop = 1;
+	$zloop = 1;
+	$orderbuys = [];
+	$ordersell = [];
+	while (1) {
+	    $this_time = time();
+	    if ((($this_time >= $zenba_b) && ($this_time <= $zenba_e)) || (($this_time >= $goba_s) && ($this_time <= $goba_e))) {
+	        $n = 0;
+	        foreach ($list as $k => $v) {
+				if ($n > 49) {
+			        $kabus->removeAll();// 50件たまったら削除
+			        $n = 0;
+			        sleep(1);
+				}
+	            $item = $kabus->getSymbol($v, 1);// 東証のみなので全部1
+	            if (isset($item['Code']) && ($item['Code'] == 4001007)) {// 認証エラー対策
+	            	break;
+	            }
+	            // 傾き計算
+	            $ans = array();
+	            if ($zloop >= 4) {
+	                $ans = calcKatamuki($reg_date, $v, $loop, $item);
+	            }
+	            // INS
+	            $query = insQuery($item, $loop, $ans);
+	            $result = pg_query($query);
+	            $n++;
+	            // select
+	            if ($zloop >= 4) {
+	                if ($bidprice = checkOrder($v, $loop)) {
+	                    $cash = $kabus->getcash();
+	                    if ($cash['StockAccountWallet'] > $bidprice * 100) {
+	                        // ここで注文を入れる
+	                        $orderbuys[$v] = $kabus->getsendorder($v, $bidprice);
+	                        //$orderbuys[$v] = $kabus->dummyOrder($v, $bidprice);// debug ダミー注文
+	                    }
+	                }
+	            }
+	            if (isset($orderbuys[$v]) && $orderbuys[$v]) {
+	                // 注文約定照会getorders
+	                $orders = $kabus->getorders();
+	                if (uriChumon($kabus, $orders, $orderbuys[$v], $v)) {
+	                	unset($orderbuys[$v]);
+	                }
+	            }
+	        }
+	        $loop++;
+	        if ($this_time >= $zenba_s) {
+	        	$zloop++;
+	        }
+			$kabus->removeAll();// API銘柄リストをリセット
+	        echo $loop . "\n";
+	        //echo $zloop . "\n";
+	        sleep(1);//sleep(3 * 60); // 5分おき
+	    }
+	    if ($this_time > $goba_e) {
+	        break;
+	    }
+	}
 }
 pg_close($db);
-
 exit;
 
 function uriChumon($kabus, $orders, $orderbuy, $symbol) {
    foreach ($orders as $val) {
         if (($val['Symbol'] == $symbol) && ($val['ID'] == $orderbuy)) {
-            if (($val['State'] == 5) && ($val['OrderState'] == 5)) {
+            if (($val['State'] == 5) && ($val['OrderState'] == 5) && ($val['CumQty'] > 0)) {
                 $info = $kabus->getinfo($symbol, 1);// 東証のみなので全部1
                 
-                $sellPrice = $info['UpperLimit'];// 値幅制限
-                //$sellPrice = intval($val['Price'] * 1.03);// ここで値幅制限チェック必要
+                $UpperLimit = $info['UpperLimit'];// 値幅制限
+                $sellPrice = intval($val['Price'] * 1.01);
+                if ($sellPrice > $UpperLimit) {// ここで値幅制限チェック
+                	$sellPrice = $UpperLimit;
+                }
                 
                 $sellQty = $val['CumQty'];
                 // ここで売り処理 26:不成（後場) 25:不成（前場）
@@ -210,7 +216,11 @@ function insQuery($item, $loop, $ans) {
         UnderBuyQty,
         TotalMarketValue, 
         inclination,
-        intercept
+        intercept,
+        AskQty,
+        AskPrice,
+        AskTime,
+        AskSign
     ) VALUES (
         '{$today}',
         $loop,
@@ -247,7 +257,11 @@ function insQuery($item, $loop, $ans) {
         {$item['UnderBuyQty']},
         {$item['TotalMarketValue']},
         $inclination,
-        $intercept
+        $intercept,
+        {$item['AskQty']},
+        {$item['AskPrice']},
+        {$item['AskTime']},
+        {$item['AskSign']}
     ) 
 END;
 

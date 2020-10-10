@@ -76,9 +76,17 @@ OverSellQty double precision,
 UnderBuyQty double precision,
 TotalMarketValue double precision,
 inclination double precision,
-intercept double precision
+intercept double precision,
+AskQty double precision,
+AskPrice double precision,
+AskTime timestamp,
+AskSign varchar(255)
 );
 
 ALTER TABLE items add column inclination double precision;
 ALTER TABLE items add column intercept double precision;
+ALTER TABLE items add column AskQty double precision;
+ALTER TABLE items add column AskPrice double precision;
+ALTER TABLE items add column AskTime timestamp;
+ALTER TABLE items add column AskSign varchar(255);
 
