@@ -6,7 +6,7 @@ date_default_timezone_set('Asia/Tokyo');
 
 $db = pg_connect("host=localhost dbname=" . DB_NAME. " user=" . DB_USER . " password=" . DB_PASS);
 
-$reg_date = "2020-10-06";
+$reg_date = "2020-10-09";
 
 $query = <<<END
     SELECT 
@@ -38,7 +38,7 @@ if ($result) {
 //$sarray = array('1447', '2931');
 foreach ($sarray as $v) {
     //echo $v . "\n";
-    for ($loop = 4; $loop < $eloop; $loop++) {
+    for ($loop = 3; $loop < $eloop; $loop++) {
         $bidprice = checkOrder($v, $loop);
         if ($bidprice = checkOrder($v, $loop)) {
             echo "[{$v}], {$bidprice}\n";
@@ -50,15 +50,17 @@ exit;
 
 function checkOrder($symbol, $loop) {
     global $reg_date;
-    $loop_array = range($loop, $loop - 3);
-    list($c4, $c3, $c2, $c1) = $loop_array; 
+    //$loop_array = range($loop, $loop - 3);
+    $loop_array = range($loop, $loop - 2);
+    //list($c4, $c3, $c2, $c1) = $loop_array; 
+    list($c3, $c2, $c1) = $loop_array; 
     $loop_in = implode(",", $loop_array);
 
     $output = [];
     $query = <<<END
     SELECT 
         Symbol, 
-        loop, CurrentPrice, CurrentPriceTime, CurrentPriceStatus, 
+        loop, CurrentPrice, CurrentPriceTime, CurrentPriceStatus, currentpricechangestatus, 
         BidPrice, vwap, ChangePreviousClosePer, tradingvolume, 
         openingprice, lowprice, inclination, intercept
     FROM items
@@ -82,11 +84,13 @@ END;
                 $output[$myloop]['lowprice'] = $row['lowprice'];
                 $output[$myloop]['inclination'] = $row['inclination'];
                 $output[$myloop]['intercept'] = $row['intercept'];
+                $output[$myloop]['currentpricechangestatus'] = $row['currentpricechangestatus'];
             }
         }
     }
 
-    return calcFourth($output, $loop_array);
+    //return calcFourth($output, $loop_array);
+    return calcThird($output, $loop_array);
 }
 
 function calcFourth($output, $loop_array) {
@@ -172,11 +176,9 @@ function calcFourth($output, $loop_array) {
     }
 
     if (($output[$c4]['inclination'] > 0) && ($output[$c4]['inclination'] < 2)) {
-        if (($k_diff1 > $k_diff2) && ($k_diff2 > $k_diff3) && ($k_diff2 > 0.001) && ($k_diff3 > 0.001)) {
-            //if (($diff1 > $diff2) && ($diff2 >= $diff3) && ($diff3 > 0)) {
-            if ((($vdiff1 > $vdiff3) || ($vdiff2 > $vdiff3)) && ($vdiff1 > 10000)) {
-                //if (($wrate < 102.1) && ($prate > 0.2) && ($drate > 1) && ($output[$c4]['changepreviouscloseper'] > 1)) {
-                if (($diff3 > 0) && ($wrate < 103) && ($prate > 0.1) && ($drate > 1) && ($srate < 103)) {
+        if (($k_diff1 > $k_diff2) && ($k_diff1 > 0.01) && ($k_diff2 > 0.01) && ($vdiff1 > 10000)) {
+                //if ((($vdiff1 > $vdiff3) || ($vdiff2 > $vdiff3)) && ($vdiff1 > 10000)) {
+                if (($wrate < 103) && ($prate > 0.1) && ($drate > 1) && ($srate < 103) && ($vrate < 25)) {
 
                     //return $bidprice;
                     $incli = number_format($output[$c4]['inclination'], 1);
@@ -193,7 +195,7 @@ function calcFourth($output, $loop_array) {
 
                     return  $expl;
                 }
-            }
+            //}
         }
     }
 
@@ -201,4 +203,103 @@ function calcFourth($output, $loop_array) {
 
 }
 
+function calcThird($output, $loop_array) {
+    list($c3, $c2, $c1) = $loop_array; 
+    $j_time = mktime(10, 20, 0);
+
+    if (isset($output[$c3]['currentpricestatus'])) {
+    	$currentpricestatus = $output[$c3]['currentpricestatus'];
+    } else {
+    	return false;
+    }
+    if (isset($output[$c3]['bidprice'])) {
+    	$bidprice = $output[$c3]['bidprice'];
+    } else {
+    	return false;
+    }
+    // 傾き１差分
+    if (isset($output[$c3]['inclination']) && isset($output[$c2]['inclination'])) {
+        $k_diff1 = $output[$c3]['inclination'] - $output[$c2]['inclination'];
+    } else {
+        return false;
+    }
+    if (isset($output[$c2]['inclination']) && isset($output[$c1]['inclination'])) {
+        $k_diff2 = $output[$c2]['inclination'] - $output[$c1]['inclination'];
+    } else {
+        return false;
+    }
+    // 傾きここまで
+
+    if (isset($output[$c3]['price']) && isset($output[$c2]['price'])) {
+        $diff1 = $output[$c3]['price'] - $output[$c2]['price'];
+        $vdiff1 = $output[$c3]['tradingvolume'] - $output[$c2]['tradingvolume'];
+    } else {
+        return false;
+    }
+    if (isset($output[$c2]['price']) && isset($output[$c1]['price'])) {
+        $diff2 = $output[$c2]['price'] - $output[$c1]['price'];
+        $vdiff2 = $output[$c2]['tradingvolume'] - $output[$c1]['tradingvolume'];
+    } else {
+        return false;
+    }
+    $prate = 0;
+    if (isset($output[$c3]['price']) && ($output[$c3]['price'] > 0)) {
+        $prate = round(100 * $diff1 / $output[$c3]['price'], 2);// 現在価格の上昇率
+    } else {
+        return false;
+    }
+    $vrate = 0;
+    if (isset($output[$c3]['tradingvolume']) && ($output[$c3]['tradingvolume'] > 0)) {
+        $vrate = round(100 * $vdiff1 / $output[$c3]['tradingvolume'], 2);// 現在出来高の上昇率
+    } else {
+        return false;
+    }
+    $wrate = 0;
+    if (isset($output[$c3]['vwap']) && ($output[$c3]['vwap'] > 0)) {
+        $wrate = round(100 * $output[$c3]['price'] / $output[$c3]['vwap'], 2);// VWAPの乖離率
+    } else {
+        return false;
+    }
+    if (isset($output[$c3]['openingprice'])) {
+        $drate = round(100 * ($output[$c3]['price'] - $output[$c3]['openingprice']) / $output[$c3]['openingprice'], 2);//始値からの上昇率
+    } else {
+        return false;
+    }
+    if (isset($output[$c3]['openingprice'])) {
+        if ($output[$c3]['price'] < $output[$c3]['openingprice']) {
+            return false;
+        }
+        $srate = round(100 * $output[$c3]['price'] / $output[$c3]['openingprice'], 2);// 始値からの乖離率
+    } else {
+        return false;
+    }
+
+    if (($output[$c3]['inclination'] > 0) && ($output[$c3]['inclination'] < 2)) {
+        if (($k_diff1 > $k_diff2) && ($k_diff1 > 0.01) && ($k_diff2 > 0.01)) {
+            if (($diff1 > $diff2) && ($vdiff1 > $vdiff2) && ($vdiff1 > 10000)) {
+                if (($output[$c3]['currentpricechangestatus'] == '0057') && ($diff2 > 0)) {
+                    if (($wrate < 103) && ($prate > 0.1) && ($drate > 1) && ($srate < 103) && ($vrate < 25)) {
+
+                        //return $bidprice;
+                        $incli = number_format($output[$c3]['inclination'], 1);
+                        $intercept = number_format($output[$c3]['intercept'], 1);
+                        $k_diff1 = number_format($k_diff1, 4);
+                        $k_diff2 = number_format($k_diff2, 4);
+                        $openingprice = preg_replace("/,/", "", $output[$c3]['openingprice']);
+
+                        $expl = "{$output[$c3]['time']}, $c3, {$incli}, {$output[$c3]['price']}, $intercept, $openingprice, ";
+                        $expl .= "$vdiff1, $vdiff2, {$output[$c3]['tradingvolume']}, ";
+                        $expl .= "{$diff1}, {$diff2}, $k_diff1, $k_diff2, ";
+                        $expl .= "{$wrate}, {$prate}, {$drate}, $vrate, {$output[$c3]['changepreviouscloseper']}, $srate";
+
+                        return  $expl;
+                    }
+                }
+            }
+        }
+    }
+
+    return false;
+
+}
 
