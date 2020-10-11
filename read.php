@@ -48,7 +48,7 @@ for ($i = 0; $i < 2; $i++) {// 認証が切れても再接続を試みる
 	            }
 	            // 傾き計算
 	            $ans = array();
-	            if ($zloop >= 4) {
+	            if ($zloop >= 3) {
 	                $ans = calcKatamuki($reg_date, $v, $loop, $item);
 	            }
 	            // INS
@@ -56,7 +56,7 @@ for ($i = 0; $i < 2; $i++) {// 認証が切れても再接続を試みる
 	            $result = pg_query($query);
 	            $n++;
 	            // select
-	            if ($zloop >= 4) {
+	            if ($zloop >= 3) {
 	                if ($bidprice = checkOrder($v, $loop)) {
 	                    $cash = $kabus->getcash();
 	                    if ($cash['StockAccountWallet'] > $bidprice * 100) {
@@ -98,7 +98,7 @@ function uriChumon($kabus, $orders, $orderbuy, $symbol) {
                 $info = $kabus->getinfo($symbol, 1);// 東証のみなので全部1
                 
                 $UpperLimit = $info['UpperLimit'];// 値幅制限
-                $sellPrice = intval($val['Price'] * 1.01);
+                $sellPrice = intval($val['Price'] * 1.017);
                 if ($sellPrice > $UpperLimit) {// ここで値幅制限チェック
                 	$sellPrice = $UpperLimit;
                 }
