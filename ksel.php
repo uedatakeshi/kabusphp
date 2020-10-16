@@ -6,7 +6,7 @@ date_default_timezone_set('Asia/Tokyo');
 
 $db = pg_connect("host=localhost dbname=" . DB_NAME. " user=" . DB_USER . " password=" . DB_PASS);
 
-$reg_date = "2020-10-09";
+$reg_date = "2020-10-12";
 
 $query = <<<END
     SELECT 
@@ -63,6 +63,7 @@ function checkOrder($symbol, $loop) {
         loop, CurrentPrice, CurrentPriceTime, CurrentPriceStatus, currentpricechangestatus, 
         BidPrice, vwap, ChangePreviousClosePer, tradingvolume, 
         openingprice, lowprice, inclination, intercept
+        bidqty, bidsign, askqty, askprice, asksign, oversellqty, underbuyqty 
     FROM items
     WHERE symbol='{$symbol}' AND loop IN ({$loop_in}) and reg_date='{$reg_date}'
     ORDER BY loop DESC 
@@ -85,7 +86,27 @@ END;
                 $output[$myloop]['inclination'] = $row['inclination'];
                 $output[$myloop]['intercept'] = $row['intercept'];
                 $output[$myloop]['currentpricechangestatus'] = $row['currentpricechangestatus'];
+                $output[$myloop]['bidqty'] = $row['bidqty'];
+                $output[$myloop]['bidsign'] = $row['bidsign'];
+                $output[$myloop]['askqty'] = $row['askqty'];
+                $output[$myloop]['askprice'] = $row['askprice'];
+                $output[$myloop]['asksign'] = $row['asksign'];
+                $output[$myloop]['oversellqty'] = $row['oversellqty'];
+                $output[$myloop]['underbuyqty'] = $row['underbuyqty'];
             }
+        }
+    }
+    $query = <<<END
+    SELECT loop, marketordersellqty, marketorderbuyqty FROM items
+    WHERE symbol='{$symbol}' AND loop <= {$loop} and reg_date='{$reg_date}' AND 
+    marketordersellqty is not null AND marketorderbuyqty is not null
+    order by loop desc limit 1
+END;
+    $result = pg_query($query);
+    if ($result) {
+        while ($row = pg_fetch_array($result, NULL, PGSQL_ASSOC)) {
+            $output[$loop]['marketordersellqty'] = $row['marketordersellqty'];
+            $output[$loop]['marketorderbuyqty'] = $row['marketorderbuyqty'];
         }
     }
 
@@ -286,11 +307,18 @@ function calcThird($output, $loop_array) {
                         $k_diff1 = number_format($k_diff1, 4);
                         $k_diff2 = number_format($k_diff2, 4);
                         $openingprice = preg_replace("/,/", "", $output[$c3]['openingprice']);
+                        $pricex1 = number_format($output[$c3]['price'] * 1.017);
+                        $pricex2 = number_format($output[$c3]['price'] * 1.027);
 
-                        $expl = "{$output[$c3]['time']}, $c3, {$incli}, {$output[$c3]['price']}, $intercept, $openingprice, ";
+                        $expl = "{$output[$c3]['time']}, $c3, {$incli}, {$output[$c3]['price']}, $pricex1, $pricex2, , $intercept, $openingprice, ";
                         $expl .= "$vdiff1, $vdiff2, {$output[$c3]['tradingvolume']}, ";
                         $expl .= "{$diff1}, {$diff2}, $k_diff1, $k_diff2, ";
                         $expl .= "{$wrate}, {$prate}, {$drate}, $vrate, {$output[$c3]['changepreviouscloseper']}, $srate";
+                        $expl .= "{$output[$c3]['bidqty']}, {$output[$c3]['askqty']}, ";
+                        $expl .= "{$output[$c3]['marketordersellqty']}, {$output[$c3]['marketorderbuyqty']}, ";
+                        $expl .= "{$output[$c3]['oversellqty']}, {$output[$c3]['underbuyqty']}, ";
+                        $expl .= "{$output[$c3]['currentpricechangestatus']}, ";
+                        
 
                         return  $expl;
                     }
