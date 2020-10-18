@@ -457,7 +457,13 @@ function calcThird($output, $loop_array) {
             if (($diff1 > $diff2) && ($vdiff1 > $vdiff2) && ($vdiff1 > 10000)) {
                 if (($output[$c3]['currentpricechangestatus'] == '0057') && ($diff2 >= 0)) {
                     if (($wrate < 103) && ($prate > 0.1) && ($drate > 1) && ($srate < 103)) {
-                        if (($output[$c3]['nariyuki_hi'] > 1.5) && (time() < $j_time)) {
+                    	if (time() < $j_time) {
+                        	if ($output[$c3]['nariyuki_hi'] > 1.5) {
+                            	return $bidprice;
+                            } else {
+                            	return false;
+                            }
+                        } else {
                             return $bidprice;
                         }
                     }
