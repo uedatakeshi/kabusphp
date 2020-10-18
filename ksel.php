@@ -6,7 +6,7 @@ date_default_timezone_set('Asia/Tokyo');
 
 $db = pg_connect("host=localhost dbname=" . DB_NAME. " user=" . DB_USER . " password=" . DB_PASS);
 
-$reg_date = "2020-10-12";
+$reg_date = "2020-10-16";
 
 $query = <<<END
     SELECT 
@@ -62,7 +62,7 @@ function checkOrder($symbol, $loop) {
         Symbol, 
         loop, CurrentPrice, CurrentPriceTime, CurrentPriceStatus, currentpricechangestatus, 
         BidPrice, vwap, ChangePreviousClosePer, tradingvolume, 
-        openingprice, lowprice, inclination, intercept
+        openingprice, lowprice, inclination, intercept,
         bidqty, bidsign, askqty, askprice, asksign, oversellqty, underbuyqty 
     FROM items
     WHERE symbol='{$symbol}' AND loop IN ({$loop_in}) and reg_date='{$reg_date}'
@@ -298,8 +298,8 @@ function calcThird($output, $loop_array) {
     if (($output[$c3]['inclination'] > 0) && ($output[$c3]['inclination'] < 2)) {
         if (($k_diff1 > $k_diff2) && ($k_diff1 > 0.01) && ($k_diff2 > 0.01)) {
             if (($diff1 > $diff2) && ($vdiff1 > $vdiff2) && ($vdiff1 > 10000)) {
-                if (($output[$c3]['currentpricechangestatus'] == '0057') && ($diff2 > 0)) {
-                    if (($wrate < 103) && ($prate > 0.1) && ($drate > 1) && ($srate < 103) && ($vrate < 25)) {
+                //if (($output[$c3]['currentpricechangestatus'] == '0057') && ($diff2 > 0)) {
+                    //if (($wrate < 103) && ($prate > 0.1) && ($drate > 1) && ($srate < 103) && ($vrate < 25)) {
 
                         //return $bidprice;
                         $incli = number_format($output[$c3]['inclination'], 1);
@@ -313,7 +313,7 @@ function calcThird($output, $loop_array) {
                         $expl = "{$output[$c3]['time']}, $c3, {$incli}, {$output[$c3]['price']}, $pricex1, $pricex2, , $intercept, $openingprice, ";
                         $expl .= "$vdiff1, $vdiff2, {$output[$c3]['tradingvolume']}, ";
                         $expl .= "{$diff1}, {$diff2}, $k_diff1, $k_diff2, ";
-                        $expl .= "{$wrate}, {$prate}, {$drate}, $vrate, {$output[$c3]['changepreviouscloseper']}, $srate";
+                        $expl .= "{$wrate}, {$prate}, {$drate}, $vrate, {$output[$c3]['changepreviouscloseper']}, $srate, ";
                         $expl .= "{$output[$c3]['bidqty']}, {$output[$c3]['askqty']}, ";
                         $expl .= "{$output[$c3]['marketordersellqty']}, {$output[$c3]['marketorderbuyqty']}, ";
                         $expl .= "{$output[$c3]['oversellqty']}, {$output[$c3]['underbuyqty']}, ";
@@ -321,8 +321,8 @@ function calcThird($output, $loop_array) {
                         
 
                         return  $expl;
-                    }
-                }
+                    //}
+                //}
             }
         }
     }
