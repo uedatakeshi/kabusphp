@@ -92,23 +92,29 @@ pg_close($db);
 exit;
 
 function uriChumon($kabus, $orders, $orderbuy, $symbol) {
-   foreach ($orders as $val) {
+    global $zenba_e;
+    if (time() > $zenba_e) {
+        $code = 26;
+    } else {
+        $code = 25;
+    }
+    foreach ($orders as $val) {
         if (($val['Symbol'] == $symbol) && ($val['ID'] == $orderbuy)) {
             if (($val['State'] == 5) && ($val['OrderState'] == 5) && ($val['CumQty'] > 0)) {
                 $info = $kabus->getinfo($symbol, 1);// 東証のみなので全部1
-                
+
                 $UpperLimit = $info['UpperLimit'];// 値幅制限
                 $sellPrice = intval($val['Price'] * 1.017);
                 if ($sellPrice > $UpperLimit) {// ここで値幅制限チェック
-                	$sellPrice = $UpperLimit;
+                    $sellPrice = $UpperLimit;
                 }
-                
+
                 $sellQty = $val['CumQty'];
                 // ここで売り処理 26:不成（後場) 25:不成（前場）
-                $order_id = $kabus->getsendorder($symbol, $sellPrice, '1', 0, '  ', $sellQty, 26);
+                $order_id = $kabus->getsendorder($symbol, $sellPrice, '1', 0, '  ', $sellQty, $code);
                 //$ordersell[$v] = $kabus->dummyOrder($symbol, $sellPrice, '1', 0, '  ', $sellQty, 26);
                 if ($order_id) {
-                	return $symbol;
+                    return $symbol;
                 } else {
                     return false;
                 }
@@ -152,6 +158,8 @@ END;
                 $output[$myloop]['inclination'] = $row['inclination'];
                 $output[$myloop]['intercept'] = $row['intercept'];
                 $output[$myloop]['currentpricechangestatus'] = $row['currentpricechangestatus'];
+                $output[$myloop]['bidqty'] = $row['bidqty'];
+                $output[$myloop]['askqty'] = $row['askqty'];
             }
         }
     }
@@ -441,7 +449,9 @@ function calcThird($output, $loop_array) {
             if (($diff1 > $diff2) && ($vdiff1 > $vdiff2) && ($vdiff1 > 10000)) {
                 if (($output[$c3]['currentpricechangestatus'] == '0057') && ($diff2 >= 0)) {
                     if (($wrate < 103) && ($prate > 0.1) && ($drate > 1)) {
-                    	return $bidprice;
+                        if ($output[$c3]['bidqty'] < $output[$c3]['askqty']) {
+                            return $bidprice;
+                        }
                     }
                 }
             }
