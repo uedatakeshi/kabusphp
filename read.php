@@ -155,22 +155,6 @@ END;
             }
         }
     }
-    $output[$loop]['nariyuki_hi'] = "";
-    $query = <<<END
-    SELECT loop, marketordersellqty, marketorderbuyqty FROM items
-    WHERE symbol='{$symbol}' AND loop <= {$loop} and reg_date='{$reg_date}' AND 
-    marketordersellqty is not null AND marketorderbuyqty is not null
-    order by loop desc limit 1
-END;
-    $result = pg_query($query);
-    if ($result) {
-        while ($row = pg_fetch_array($result, NULL, PGSQL_ASSOC)) {
-            if (isset($row['marketordersellqty']) && ($row['marketordersellqty'] > 0) && isset($row['marketorderbuyqty']) && ($row['marketorderbuyqty'] > 0)) {
-                $output[$loop]['nariyuki_hi'] = $row['marketorderbuyqty'] / $row['marketordersellqty'];
-            }
-        }
-    }
-
 
     return calcThird($output, $loop_array);
 }
@@ -456,10 +440,8 @@ function calcThird($output, $loop_array) {
         if (($k_diff1 > $k_diff2) && ($k_diff1 > 0.01) && ($k_diff2 > 0.01)) {
             if (($diff1 > $diff2) && ($vdiff1 > $vdiff2) && ($vdiff1 > 10000)) {
                 if (($output[$c3]['currentpricechangestatus'] == '0057') && ($diff2 >= 0)) {
-                    if (($wrate < 103) && ($prate > 0.1) && ($drate > 1) && ($srate < 103)) {
-                        if (($output[$c3]['nariyuki_hi'] > 1.5) && (time() < $j_time)) {
-                            return $bidprice;
-                        }
+                    if (($wrate < 103) && ($prate > 0.1) && ($drate > 1)) {
+                    	return $bidprice;
                     }
                 }
             }
