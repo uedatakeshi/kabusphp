@@ -135,7 +135,8 @@ function checkOrder($symbol, $loop) {
         Symbol, 
         loop, CurrentPrice, CurrentPriceTime, CurrentPriceStatus, currentpricechangestatus, 
         BidPrice, vwap, ChangePreviousClosePer, tradingvolume, 
-        openingprice, lowprice, inclination, intercept
+        openingprice, lowprice, inclination, intercept,
+        bidqty, askqty
     FROM items
     WHERE symbol='{$symbol}' AND loop IN ({$loop_in}) and reg_date='{$reg_date}'
     ORDER BY loop DESC 
@@ -147,17 +148,20 @@ END;
             $vwap = $row['vwap'];
             if (preg_match("/^[0-9]+$/", $row['currentprice'])) {
                 $output[$myloop]['price'] = $row['currentprice'];
-                $output[$myloop]['bidprice'] = $row['bidprice'];
                 $output[$myloop]['time'] = $row['currentpricetime'];
                 $output[$myloop]['currentpricestatus'] = $row['currentpricestatus'];
+                $output[$myloop]['currentpricechangestatus'] = $row['currentpricechangestatus'];
+
+                $output[$myloop]['bidprice'] = $row['bidprice'];
                 $output[$myloop]['vwap'] = $row['vwap'];
                 $output[$myloop]['changepreviouscloseper'] = $row['changepreviouscloseper'];
                 $output[$myloop]['tradingvolume'] = $row['tradingvolume'];
+
                 $output[$myloop]['openingprice'] = $row['openingprice'];
                 $output[$myloop]['lowprice'] = $row['lowprice'];
                 $output[$myloop]['inclination'] = $row['inclination'];
                 $output[$myloop]['intercept'] = $row['intercept'];
-                $output[$myloop]['currentpricechangestatus'] = $row['currentpricechangestatus'];
+
                 $output[$myloop]['bidqty'] = $row['bidqty'];
                 $output[$myloop]['askqty'] = $row['askqty'];
             }
@@ -449,7 +453,7 @@ function calcThird($output, $loop_array) {
             if (($diff1 > $diff2) && ($vdiff1 > $vdiff2) && ($vdiff1 > 10000)) {
                 if (($output[$c3]['currentpricechangestatus'] == '0057') && ($diff2 >= 0)) {
                     if (($wrate < 103) && ($prate > 0.1) && ($drate > 1)) {
-                        if ($output[$c3]['bidqty'] < $output[$c3]['askqty']) {
+                        if ($output[$c3]['bidqty'] && $output[$c3]['askqty'] && ($output[$c3]['bidqty'] < $output[$c3]['askqty'])) {
                             return $bidprice;
                         }
                     }
