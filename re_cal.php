@@ -9,10 +9,10 @@ date_default_timezone_set('Asia/Tokyo');
 
 $db = pg_connect("host=localhost dbname=" . DB_NAME. " user=" . DB_USER . " password=" . DB_PASS);
 
-$reg_date = "2020-10-20";
-$sarray = array('7779', '6188', '2158', '4784', '6471', '3469', '2362', '7752', '6473', '7205', '5411', '3645');
-//$reg_date = "2020-10-22";
-//$sarray = array('8233', '7779', '3941', '1447', '7205', '2440', '2158');
+//$reg_date = "2020-10-20";
+//$sarray = array('7779', '6188', '2158', '4784', '6471', '3469', '2362', '7752', '6473', '7205', '5411', '3645');
+$reg_date = "2020-10-22";
+$sarray = array('8233', '7779', '3941', '1447', '7205', '2440', '2158');
 //$reg_date = "2020-10-16";
 //$sarray = array('6473', '7261', '4202', '1803', '8233', '5411', '6471', '7182', '7731', '1447', '2191', '2440', '7513', '3796', '7187');
 
@@ -104,6 +104,8 @@ END;
             }
         }
     }
+    $output[$loop]['marketordersellqty'] = "";
+    $output[$loop]['marketorderbuyqty'] = "";
     $query = <<<END
     SELECT loop, marketordersellqty, marketorderbuyqty FROM items
     WHERE symbol='{$symbol}' AND loop <= {$loop} and reg_date='{$reg_date}' AND 
@@ -226,11 +228,11 @@ function calcFourth($output, $loop_array) {
                     $expl = "{$output[$c4]['time']}, $c4, {$incli}, {$output[$c4]['price']}, $pricex1, $pricex2, ,  $intercept, $openingprice, ";
                     $expl .= "$vdiff1, $vdiff2, $vdiff3, {$output[$c4]['tradingvolume']}, ";
                     $expl .= "{$diff1}, {$diff2}, {$diff3}, $k_diff1, $k_diff2, $k_diff3, ";
-                    $expl .= "{$wrate}, {$prate}, {$drate}, $vrate, {$output[$c4]['changepreviouscloseper']}, $srate";
-                    $expl .= "{$output[$c3]['bidqty']}, {$output[$c3]['askqty']}, ";
-                    $expl .= "{$output[$c3]['marketordersellqty']}, {$output[$c3]['marketorderbuyqty']}, ";
-                    $expl .= "{$output[$c3]['oversellqty']}, {$output[$c3]['underbuyqty']}, ";
-                    $expl .= "{$output[$c3]['currentpricechangestatus']}, ";
+                    $expl .= "{$wrate}, {$prate}, {$drate}, $vrate, {$output[$c4]['changepreviouscloseper']}, $srate, ";
+                    $expl .= "{$output[$c4]['bidqty']}, {$output[$c4]['askqty']}, ";
+                    $expl .= "{$output[$c4]['marketordersellqty']}, {$output[$c4]['marketorderbuyqty']}, ";
+                    $expl .= "{$output[$c4]['oversellqty']}, {$output[$c4]['underbuyqty']}, ";
+                    $expl .= "{$output[$c4]['currentpricechangestatus']}, ";
 
                     return  $expl;
                 }

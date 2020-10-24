@@ -39,7 +39,6 @@ if ($result) {
 foreach ($sarray as $v) {
     //echo $v . "\n";
     for ($loop = 3; $loop < $eloop; $loop++) {
-        $bidprice = checkOrder($v, $loop);
         if ($bidprice = checkOrder($v, $loop)) {
             echo "[{$v}], {$bidprice}\n";
         }
@@ -197,31 +196,33 @@ function calcFourth($output, $loop_array) {
     }
 
     if (($output[$c4]['inclination'] > 0) && ($output[$c4]['inclination'] < 2)) {
-        if (($k_diff1 > $k_diff2) && ($k_diff1 > 0.01) && ($k_diff2 > 0.01) && ($vdiff1 > 10000)) {
-                //if ((($vdiff1 > $vdiff3) || ($vdiff2 > $vdiff3)) && ($vdiff1 > 10000)) {
-                if (($wrate < 103) && ($prate > 0.1) && ($drate > 1) && ($srate < 103) && ($vrate < 25)) {
+        if (($k_diff1 > $k_diff2) && ($k_diff2 > $k_diff3) && ($k_diff3 > 0.01)) {
+            if (($diff1 > $diff2) && ($diff2 > $diff3) && ($diff3 >= 0)) {
+                if ((($vdiff1 > $vdiff3) || ($vdiff2 > $vdiff3)) && ($vdiff1 > 10000)) {
+                    if ($output[$c4]['currentpricechangestatus'] == '0057') {
+                        if (($prate > 0.1) && ($drate > 1)) {
 
-                    //return $bidprice;
-                    $incli = number_format($output[$c4]['inclination'], 1);
-                    $intercept = number_format($output[$c4]['intercept'], 1);
-                    $k_diff1 = number_format($k_diff1, 4);
-                    $k_diff2 = number_format($k_diff2, 4);
-                    $k_diff3 = number_format($k_diff3, 4);
-                    $openingprice = preg_replace("/,/", "", $output[$c4]['openingprice']);
+                            //return $bidprice;
+                            $incli = number_format($output[$c4]['inclination'], 1);
+                            $intercept = number_format($output[$c4]['intercept'], 1);
+                            $k_diff1 = number_format($k_diff1, 4);
+                            $k_diff2 = number_format($k_diff2, 4);
+                            $k_diff3 = number_format($k_diff3, 4);
+                            $openingprice = preg_replace("/,/", "", $output[$c4]['openingprice']);
 
-                    $expl = "{$output[$c4]['time']}, $c4, {$incli}, {$output[$c4]['price']}, $intercept, $openingprice, ";
-                    $expl .= "$vdiff1, $vdiff2, $vdiff3, {$output[$c4]['tradingvolume']}, ";
-                    $expl .= "{$diff1}, {$diff2}, {$diff3}, $k_diff1, $k_diff2, $k_diff3, ";
-                    $expl .= "{$wrate}, {$prate}, {$drate}, $vrate, {$output[$c4]['changepreviouscloseper']}, $srate";
+                            $expl = "{$output[$c4]['time']}, $c4, {$incli}, {$output[$c4]['price']}, $intercept, $openingprice, ";
+                            $expl .= "$vdiff1, $vdiff2, $vdiff3, {$output[$c4]['tradingvolume']}, ";
+                            $expl .= "{$diff1}, {$diff2}, {$diff3}, $k_diff1, $k_diff2, $k_diff3, ";
+                            $expl .= "{$wrate}, {$prate}, {$drate}, $vrate, {$output[$c4]['changepreviouscloseper']}, $srate";
 
-                    return  $expl;
+                            return  $expl;
+                        }
+                    }
                 }
-            //}
+            }
         }
     }
-
     return false;
-
 }
 
 function calcThird($output, $loop_array) {
@@ -296,10 +297,10 @@ function calcThird($output, $loop_array) {
     }
 
     if (($output[$c3]['inclination'] > 0) && ($output[$c3]['inclination'] < 2)) {
-        if (($k_diff1 > $k_diff2) && ($k_diff1 > 0.01) && ($k_diff2 > 0.01)) {
-            if (($diff1 > $diff2) && ($vdiff1 > $vdiff2) && ($vdiff1 > 10000)) {
-                //if (($output[$c3]['currentpricechangestatus'] == '0057') && ($diff2 > 0)) {
-                    //if (($wrate < 103) && ($prate > 0.1) && ($drate > 1) && ($srate < 103) && ($vrate < 25)) {
+        if (($k_diff1 > $k_diff2) && ($k_diff1 > 0.1) && ($k_diff2 > 0.01)) {
+            if (($diff1 > $diff2) && ($diff2 >= 0) && ($vdiff1 > $vdiff2) && ($vdiff1 > 10000)) {
+                if ($output[$c3]['currentpricechangestatus'] == '0057') {
+                    if (($prate > 0.1) && ($drate > 1)) {
 
                         //return $bidprice;
                         $incli = number_format($output[$c3]['inclination'], 1);
@@ -318,11 +319,11 @@ function calcThird($output, $loop_array) {
                         $expl .= "{$output[$c3]['marketordersellqty']}, {$output[$c3]['marketorderbuyqty']}, ";
                         $expl .= "{$output[$c3]['oversellqty']}, {$output[$c3]['underbuyqty']}, ";
                         $expl .= "{$output[$c3]['currentpricechangestatus']}, ";
-                        
+
 
                         return  $expl;
-                    //}
-                //}
+                    }
+                }
             }
         }
     }
