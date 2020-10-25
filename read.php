@@ -375,10 +375,10 @@ function calcFourth($output, $loop_array) {
 
     if (($output[$c4]['inclination'] > 0) && ($output[$c4]['inclination'] < 2)) {
         if (($k_diff1 > $k_diff2) && ($k_diff2 > $k_diff3) && ($k_diff3 > 0.01)) {
-            if (($diff1 > $diff2) && ($diff2 > $diff3) && ($diff3 >= 0)) {
+            if (($diff1 > $diff2) && ($diff2 > $diff3) && ($diff3 > 0)) {
                 if ((($vdiff1 > $vdiff3) || ($vdiff2 > $vdiff3)) && ($vdiff1 > 10000)) {
                     if ($output[$c4]['currentpricechangestatus'] == '0057') {
-                        if (($prate > 0.1) && ($drate > 1)) {
+                        if (($prate > 0.1) ) {
                             return $bidprice;
                         }
                     }
@@ -465,7 +465,7 @@ function calcThird($output, $loop_array) {
         if (($k_diff1 > $k_diff2) && ($k_diff1 > 0.1) && ($k_diff2 > 0.01)) {
             if (($diff1 > $diff2) && ($diff2 >= 0) && ($vdiff1 > $vdiff2) && ($vdiff1 > 10000)) {
                 if ($output[$c3]['currentpricechangestatus'] == '0057') {
-                    if (($prate > 0.1) && ($drate > 1)) {
+                    if (($prate > 1) && ($drate > 1)) {
                         return $bidprice;
                     }
                 }

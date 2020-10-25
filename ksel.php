@@ -6,13 +6,13 @@ date_default_timezone_set('Asia/Tokyo');
 
 $db = pg_connect("host=localhost dbname=" . DB_NAME. " user=" . DB_USER . " password=" . DB_PASS);
 
-$reg_date = "2020-10-23";
+$reg_date = "2020-10-20";
 
 $query = <<<END
     SELECT 
         Symbol 
     FROM items
-    WHERE reg_date='{$reg_date}'
+    WHERE reg_date='{$reg_date}' 
     GROUP BY symbol
 END;
 $result = pg_query($query);
@@ -50,7 +50,8 @@ if ($result) {
 //$sarray = array('1447', '2931');
 foreach ($sarray as $v) {
     //echo $v . "\n";
-    for ($loop = 3; $loop < $eloop; $loop++) {
+    //for ($loop = 3; $loop < $eloop; $loop++) {
+    for ($loop = 3; $loop < 70; $loop++) {
         if ($bidprice = checkOrder($v, $loop)) {
             echo "[{$v}], {$bidprice}\n";
         }
@@ -219,9 +220,9 @@ function calcFourth($output, $loop_array) {
     if (($output[$c4]['inclination'] > 0) && ($output[$c4]['inclination'] < 2)) {
         if (($k_diff1 > $k_diff2) && ($k_diff2 > $k_diff3) && ($k_diff3 > 0.01)) {
             if (($diff1 > $diff2) && ($diff2 > $diff3) && ($diff3 > 0)) {
-                if (($vdiff1 > $vdiff3) && ($vdiff2 > $vdiff3) && ($vdiff1 > 10000)) {
+                if ((($vdiff1 > $vdiff3) || ($vdiff2 > $vdiff3)) && ($vdiff1 > 10000)) {
                     if ($output[$c4]['currentpricechangestatus'] == '0057') {
-                        if (($prate > 0.1) && ($drate > 1)) {
+                        if (($prate > 0.1) ) {
 
                             //return $bidprice;
                             $incli = number_format($output[$c4]['inclination'], 1);
