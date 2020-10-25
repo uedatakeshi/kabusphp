@@ -6,7 +6,7 @@ date_default_timezone_set('Asia/Tokyo');
 
 $db = pg_connect("host=localhost dbname=" . DB_NAME. " user=" . DB_USER . " password=" . DB_PASS);
 
-$reg_date = "2020-10-20";
+$reg_date = "2020-10-23";
 
 $query = <<<END
     SELECT 
@@ -35,6 +35,18 @@ if ($result) {
     }
 }
 
+$query = <<<END
+SELECT loop FROM items 
+    WHERE reg_date='{$reg_date}' AND 
+    currentPricetime > '{$reg_date} 9:30:00' LIMIT 1;
+END;
+$result = pg_query($query);
+if ($result) {
+    while ($row = pg_fetch_array($result, NULL, PGSQL_ASSOC)) {
+        $loop_change = $row['loop'];
+    }
+}
+
 //$sarray = array('1447', '2931');
 foreach ($sarray as $v) {
     //echo $v . "\n";
@@ -49,10 +61,14 @@ exit;
 
 function checkOrder($symbol, $loop) {
     global $reg_date;
-    //$loop_array = range($loop, $loop - 3);
-    $loop_array = range($loop, $loop - 2);
-    //list($c4, $c3, $c2, $c1) = $loop_array; 
-    list($c3, $c2, $c1) = $loop_array; 
+    global $loop_change;
+    if ($loop < $loop_change) {
+        $loop_array = range($loop, $loop - 2);
+        list($c3, $c2, $c1) = $loop_array; 
+    } else {
+        $loop_array = range($loop, $loop - 3);
+        list($c4, $c3, $c2, $c1) = $loop_array; 
+    }
     $loop_in = implode(",", $loop_array);
 
     $output = [];
@@ -95,6 +111,8 @@ END;
             }
         }
     }
+    $output[$loop]['marketordersellqty'] = "";
+    $output[$loop]['marketorderbuyqty'] = "";
     $query = <<<END
     SELECT loop, marketordersellqty, marketorderbuyqty FROM items
     WHERE symbol='{$symbol}' AND loop <= {$loop} and reg_date='{$reg_date}' AND 
@@ -109,8 +127,11 @@ END;
         }
     }
 
-    //return calcFourth($output, $loop_array);
-    return calcThird($output, $loop_array);
+    if ($loop < $loop_change) {
+        return calcThird($output, $loop_array);
+    } else {
+        return calcFourth($output, $loop_array);
+    }
 }
 
 function calcFourth($output, $loop_array) {
@@ -197,8 +218,8 @@ function calcFourth($output, $loop_array) {
 
     if (($output[$c4]['inclination'] > 0) && ($output[$c4]['inclination'] < 2)) {
         if (($k_diff1 > $k_diff2) && ($k_diff2 > $k_diff3) && ($k_diff3 > 0.01)) {
-            if (($diff1 > $diff2) && ($diff2 > $diff3) && ($diff3 >= 0)) {
-                if ((($vdiff1 > $vdiff3) || ($vdiff2 > $vdiff3)) && ($vdiff1 > 10000)) {
+            if (($diff1 > $diff2) && ($diff2 > $diff3) && ($diff3 > 0)) {
+                if (($vdiff1 > $vdiff3) && ($vdiff2 > $vdiff3) && ($vdiff1 > 10000)) {
                     if ($output[$c4]['currentpricechangestatus'] == '0057') {
                         if (($prate > 0.1) && ($drate > 1)) {
 
@@ -300,28 +321,30 @@ function calcThird($output, $loop_array) {
         if (($k_diff1 > $k_diff2) && ($k_diff1 > 0.1) && ($k_diff2 > 0.01)) {
             if (($diff1 > $diff2) && ($diff2 >= 0) && ($vdiff1 > $vdiff2) && ($vdiff1 > 10000)) {
                 if ($output[$c3]['currentpricechangestatus'] == '0057') {
-                    if (($prate > 0.1) && ($drate > 1)) {
+                    if (($prate > 1) && ($drate > 1)) {
+                        //if ($output[$c3]['bidqty'] && $output[$c3]['askqty'] && ($output[$c3]['bidqty'] < $output[$c3]['askqty'])) {
 
-                        //return $bidprice;
-                        $incli = number_format($output[$c3]['inclination'], 1);
-                        $intercept = number_format($output[$c3]['intercept'], 1);
-                        $k_diff1 = number_format($k_diff1, 4);
-                        $k_diff2 = number_format($k_diff2, 4);
-                        $openingprice = preg_replace("/,/", "", $output[$c3]['openingprice']);
-                        $pricex1 = number_format($output[$c3]['price'] * 1.017);
-                        $pricex2 = number_format($output[$c3]['price'] * 1.027);
+                            //return $bidprice;
+                            $incli = number_format($output[$c3]['inclination'], 1);
+                            $intercept = number_format($output[$c3]['intercept'], 1);
+                            $k_diff1 = number_format($k_diff1, 4);
+                            $k_diff2 = number_format($k_diff2, 4);
+                            $openingprice = preg_replace("/,/", "", $output[$c3]['openingprice']);
+                            $pricex1 = number_format($output[$c3]['price'] * 1.017);
+                            $pricex2 = number_format($output[$c3]['price'] * 1.027);
 
-                        $expl = "{$output[$c3]['time']}, $c3, {$incli}, {$output[$c3]['price']}, $pricex1, $pricex2, , $intercept, $openingprice, ";
-                        $expl .= "$vdiff1, $vdiff2, {$output[$c3]['tradingvolume']}, ";
-                        $expl .= "{$diff1}, {$diff2}, $k_diff1, $k_diff2, ";
-                        $expl .= "{$wrate}, {$prate}, {$drate}, $vrate, {$output[$c3]['changepreviouscloseper']}, $srate, ";
-                        $expl .= "{$output[$c3]['bidqty']}, {$output[$c3]['askqty']}, ";
-                        $expl .= "{$output[$c3]['marketordersellqty']}, {$output[$c3]['marketorderbuyqty']}, ";
-                        $expl .= "{$output[$c3]['oversellqty']}, {$output[$c3]['underbuyqty']}, ";
-                        $expl .= "{$output[$c3]['currentpricechangestatus']}, ";
+                            $expl = "{$output[$c3]['time']}, $c3, {$incli}, {$output[$c3]['price']}, $pricex1, $pricex2, , $intercept, $openingprice, ";
+                            $expl .= "$vdiff1, $vdiff2, {$output[$c3]['tradingvolume']}, ";
+                            $expl .= "{$diff1}, {$diff2}, $k_diff1, $k_diff2, ";
+                            $expl .= "{$wrate}, {$prate}, {$drate}, $vrate, {$output[$c3]['changepreviouscloseper']}, $srate, ";
+                            $expl .= "{$output[$c3]['bidqty']}, {$output[$c3]['askqty']}, ";
+                            $expl .= "{$output[$c3]['marketordersellqty']}, {$output[$c3]['marketorderbuyqty']}, ";
+                            $expl .= "{$output[$c3]['oversellqty']}, {$output[$c3]['underbuyqty']}, ";
+                            $expl .= "{$output[$c3]['currentpricechangestatus']}, ";
 
 
-                        return  $expl;
+                            return  $expl;
+                        //}
                     }
                 }
             }
