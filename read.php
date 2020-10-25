@@ -8,6 +8,7 @@ $zenba_s = mktime(9, 0, 0);// 前場寄付
 $zenba_e = mktime(11, 30, 0);//前場引け
 $goba_s = mktime(12, 30, 0);//後場寄付
 $goba_e = mktime(14, 55, 0);//後場引け
+$change_loop = mktime(9, 30, 0);// 前場寄付
 $reg_date = date("Y-m-d");
 $db = pg_connect("host=localhost dbname=" . DB_NAME. " user=" . DB_USER . " password=" . DB_PASS);
 
@@ -125,8 +126,13 @@ function uriChumon($kabus, $orders, $orderbuy, $symbol) {
 }
 
 function checkOrder($symbol, $loop) {
-    $loop_array = range($loop, $loop - 2);
-    list($c3, $c2, $c1) = $loop_array; 
+    if (time() < $change_loop) {
+        $loop_array = range($loop, $loop - 2);
+        list($c3, $c2, $c1) = $loop_array; 
+    } else {
+        $loop_array = range($loop, $loop - 3);
+        list($c4, $c3, $c2, $c1) = $loop_array; 
+    }
     $loop_in = implode(",", $loop_array);
     $reg_date = date("Y-m-d");
     $output = [];
@@ -168,7 +174,11 @@ END;
         }
     }
 
-    return calcThird($output, $loop_array);
+    if (time() < $change_loop) {
+        return calcThird($output, $loop_array);
+    } else {
+        return calcFourth($output, $loop_array);
+    }
 }
 
 function insQuery($item, $loop, $ans) {
@@ -364,17 +374,20 @@ function calcFourth($output, $loop_array) {
     }
 
     if (($output[$c4]['inclination'] > 0) && ($output[$c4]['inclination'] < 2)) {
-        if (($k_diff1 > $k_diff2) && ($k_diff2 > $k_diff3) && ($k_diff2 > 0.001) && ($k_diff3 > 0.001)) {
-            if ((($vdiff1 > $vdiff3) || ($vdiff2 > $vdiff3)) && ($vdiff1 > 10000)) {
-                if (($diff3 > 0) && ($wrate < 103) && ($prate > 0.1) && ($drate > 1) && ($srate < 103)) {
-                    return $bidprice;
+        if (($k_diff1 > $k_diff2) && ($k_diff2 > $k_diff3) && ($k_diff3 > 0.01)) {
+            if (($diff1 > $diff2) && ($diff2 > $diff3) && ($diff3 >= 0)) {
+                if ((($vdiff1 > $vdiff3) || ($vdiff2 > $vdiff3)) && ($vdiff1 > 10000)) {
+                    if ($output[$c4]['currentpricechangestatus'] == '0057') {
+                        if (($prate > 0.1) && ($drate > 1)) {
+                            return $bidprice;
+                        }
+                    }
                 }
             }
         }
     }
 
     return false;
-
 }
 
 function calcThird($output, $loop_array) {
@@ -449,13 +462,11 @@ function calcThird($output, $loop_array) {
     }
 
     if (($output[$c3]['inclination'] > 0) && ($output[$c3]['inclination'] < 2)) {
-        if (($k_diff1 > $k_diff2) && ($k_diff1 > 0.01) && ($k_diff2 > 0.01)) {
-            if (($diff1 > $diff2) && ($vdiff1 > $vdiff2) && ($vdiff1 > 10000)) {
-                if (($output[$c3]['currentpricechangestatus'] == '0057') && ($diff2 >= 0)) {
-                    if (($wrate < 103) && ($prate > 0.1) && ($drate > 1)) {
-                        if ($output[$c3]['bidqty'] && $output[$c3]['askqty'] && ($output[$c3]['bidqty'] < $output[$c3]['askqty'])) {
-                            return $bidprice;
-                        }
+        if (($k_diff1 > $k_diff2) && ($k_diff1 > 0.1) && ($k_diff2 > 0.01)) {
+            if (($diff1 > $diff2) && ($diff2 >= 0) && ($vdiff1 > $vdiff2) && ($vdiff1 > 10000)) {
+                if ($output[$c3]['currentpricechangestatus'] == '0057') {
+                    if (($prate > 0.1) && ($drate > 1)) {
+                        return $bidprice;
                     }
                 }
             }
