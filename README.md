@@ -5,7 +5,7 @@
 
 - 上場銘柄のリストはこちらからダウンロードして、コードだけのcsvにしておく。code.csv
 
-https://kabusapo.com/stock-data/stock-list/
+https://www.jpx.co.jp/markets/statistics-equities/misc/01.html
 
 - db.sql を元にデータベースを作成しておく。こちらはpostgresだがmysqlでやる場合はDB処理部分のソースを書き換えること。
 - テーブルは2つだけで、symbolsは上場全銘柄のデータを保存し、対象リストの絞り込みに使う。
