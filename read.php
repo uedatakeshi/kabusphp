@@ -5,7 +5,7 @@ require_once 'config.php';
 date_default_timezone_set('Asia/Tokyo');
 $zenba_b = mktime(8, 56, 0);// 寄付前
 $zenba_s = mktime(9, 0, 0);// 前場寄付
-$zenba_e = mktime(11, 30, 0);//前場引け
+$zenba_e = mktime(11, 32, 0);//前場引け
 $goba_s = mktime(12, 30, 0);//後場寄付
 $goba_e = mktime(14, 55, 0);//後場引け
 $change_loop = mktime(9, 30, 0);// 前場寄付
@@ -126,6 +126,7 @@ function uriChumon($kabus, $orders, $orderbuy, $symbol) {
 }
 
 function checkOrder($symbol, $loop) {
+	global $change_loop;
     if (time() < $change_loop) {
         $loop_array = range($loop, $loop - 2);
         list($c3, $c2, $c1) = $loop_array; 
