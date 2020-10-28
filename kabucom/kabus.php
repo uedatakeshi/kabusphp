@@ -72,6 +72,43 @@ class Kabus
         return $response;
     }
 
+    // 注文取り消し
+    public function cancelorders($order_id) {
+        $url = "http://localhost:" . $this->port . "/kabusapi/cancelorder";
+        $data = [
+            'Password' => $this->order_password,
+            'OrderId' => $order_id,
+        ];
+        $opts = [
+            'http' => [
+                'method' => "PUT",
+                'header'=> "Content-type: application/json\r\n" . 
+                "Accept: application/json\r\n" . 
+                "X-API-KEY: " . $this->apikey, 
+                'content' => json_encode($data),
+                'ignore_errors' => true,
+                'protocol_version' => '1.1'
+            ]
+        ];
+        $context = stream_context_create($opts);
+        $json = file_get_contents($url, false, $context);
+        if (isset($http_response_header)) {
+            $pos = strpos($http_response_header[0], '200');
+            if ($pos === false) {
+                $this->log->error("リクエスト失敗", [$url, $data, $json]);
+            }
+        }
+        $response = json_decode($json, true);
+        if (isset($response['Result']) && ($response['Result'] === 0)) {
+            $order_id = $response['OrderId'];
+	        return $order_id;
+        } else {
+            $this->log->error("取り消しに失敗しました", [$url, $data]);
+        }
+
+        return false;
+    }
+
     // dummy注文発注
     public function dummyOrder($symbol, $price, $side='2', $delivtype=2, $fundtype='AA', $qty=100, $frontordertype=27) {
     	$expireday = date("Ymd");

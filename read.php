@@ -70,10 +70,16 @@ for ($i = 0; $i < 2; $i++) {// 認証が切れても再接続を試みる
 	            if (isset($orderbuys[$v]) && $orderbuys[$v]) {
 	                // 注文約定照会getorders
 	                $orders = $kabus->getorders();
-	                if (uriChumon($kabus, $orders, $orderbuys[$v], $v)) {
+	                if ($ordersells[$v] = uriChumon($kabus, $orders, $orderbuys[$v], $v)) {
 	                	unset($orderbuys[$v]);
 	                }
 	            }
+	            if (isset($ordersells[$v]) && $ordersells[$v]) {
+	                $orders = $kabus->getorders();
+	                if (sonGiri($kabus, $orders, $ordersells[$v], $v, $item)) {
+	                	unset($ordersells[$v]);
+	                }
+                }
 	        }
 	        $loop++;
 	        if ($this_time >= $zenba_s) {
@@ -91,6 +97,30 @@ for ($i = 0; $i < 2; $i++) {// 認証が切れても再接続を試みる
 }
 pg_close($db);
 exit;
+
+function sonGiri($kabus, $orders, $ordersell, $symbol, $item) {
+    foreach ($orders as $val) {
+        if (($val['Symbol'] == $symbol) && ($val['ID'] == $ordersell)) {
+            if (($val['State'] == 3) && ($val['OrderState'] == 3) && ($val['CumQty'] == 0)) {
+                $songiri = intval($val['Price'] * 0.9714);// 売りの指値から逆算
+                if ($item['CurrentPrice'] <= $songiri) {
+                    if ($kabus->cancelorders($ordersell)) {
+                        $sellPrice = $item['AskPrice'];
+                        $sellQty = $val['OrderQty'];
+                        $code = 27;
+                        $order_id = $kabus->getsendorder($symbol, $sellPrice, '1', 0, '  ', $sellQty, $code);
+                        if ($order_id) {
+                            return $order_id;
+                        } else {
+                            return false;
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+    }
+}
 
 function uriChumon($kabus, $orders, $orderbuy, $symbol) {
     global $zenba_e;
@@ -115,7 +145,7 @@ function uriChumon($kabus, $orders, $orderbuy, $symbol) {
                 $order_id = $kabus->getsendorder($symbol, $sellPrice, '1', 0, '  ', $sellQty, $code);
                 //$ordersell[$v] = $kabus->dummyOrder($symbol, $sellPrice, '1', 0, '  ', $sellQty, 26);
                 if ($order_id) {
-                    return $symbol;
+                    return $order_id;
                 } else {
                     return false;
                 }
