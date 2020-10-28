@@ -6,7 +6,7 @@ date_default_timezone_set('Asia/Tokyo');
 
 $db = pg_connect("host=localhost dbname=" . DB_NAME. " user=" . DB_USER . " password=" . DB_PASS);
 
-$reg_date = "2020-10-20";
+$reg_date = "2020-10-28";
 
 $query = <<<END
     SELECT 
@@ -222,7 +222,7 @@ function calcFourth($output, $loop_array) {
             if (($diff1 > $diff2) && ($diff2 > $diff3) && ($diff3 > 0)) {
                 if ((($vdiff1 > $vdiff3) || ($vdiff2 > $vdiff3)) && ($vdiff1 > 10000)) {
                     if ($output[$c4]['currentpricechangestatus'] == '0057') {
-                        if (($prate > 0.1) ) {
+                        //if (($prate > 0.1) ) {
 
                             //return $bidprice;
                             $incli = number_format($output[$c4]['inclination'], 1);
@@ -231,14 +231,20 @@ function calcFourth($output, $loop_array) {
                             $k_diff2 = number_format($k_diff2, 4);
                             $k_diff3 = number_format($k_diff3, 4);
                             $openingprice = preg_replace("/,/", "", $output[$c4]['openingprice']);
+                            $pricex1 = number_format($output[$c4]['price'] * 1.017);
+                            $pricex2 = number_format($output[$c4]['price'] * 1.027);
 
-                            $expl = "{$output[$c4]['time']}, $c4, {$incli}, {$output[$c4]['price']}, $intercept, $openingprice, ";
+                            $expl = "{$output[$c4]['time']}, $c4, {$incli}, {$output[$c4]['price']}, $pricex1, $pricex2, ,  $intercept, $openingprice, ";
                             $expl .= "$vdiff1, $vdiff2, $vdiff3, {$output[$c4]['tradingvolume']}, ";
                             $expl .= "{$diff1}, {$diff2}, {$diff3}, $k_diff1, $k_diff2, $k_diff3, ";
-                            $expl .= "{$wrate}, {$prate}, {$drate}, $vrate, {$output[$c4]['changepreviouscloseper']}, $srate";
+                            $expl .= "{$wrate}, {$prate}, {$drate}, $vrate, {$output[$c4]['changepreviouscloseper']}, $srate, ";
+                            $expl .= "{$output[$c4]['bidqty']}, {$output[$c4]['askqty']}, ";
+                            $expl .= "{$output[$c4]['marketordersellqty']}, {$output[$c4]['marketorderbuyqty']}, ";
+                            $expl .= "{$output[$c4]['oversellqty']}, {$output[$c4]['underbuyqty']}, ";
+                            $expl .= "{$output[$c4]['currentpricechangestatus']}, ";
 
                             return  $expl;
-                        }
+                        //}
                     }
                 }
             }
@@ -322,31 +328,31 @@ function calcThird($output, $loop_array) {
         if (($k_diff1 > $k_diff2) && ($k_diff1 > 0.1) && ($k_diff2 > 0.01)) {
             if (($diff1 > $diff2) && ($diff2 >= 0) && ($vdiff1 > $vdiff2) && ($vdiff1 > 10000)) {
                 if ($output[$c3]['currentpricechangestatus'] == '0057') {
-                    if (($prate > 1) && ($drate > 1)) {
+                    //if (($prate > 1) && ($drate > 1)) {
                         //if ($output[$c3]['bidqty'] && $output[$c3]['askqty'] && ($output[$c3]['bidqty'] < $output[$c3]['askqty'])) {
 
-                            //return $bidprice;
-                            $incli = number_format($output[$c3]['inclination'], 1);
-                            $intercept = number_format($output[$c3]['intercept'], 1);
-                            $k_diff1 = number_format($k_diff1, 4);
-                            $k_diff2 = number_format($k_diff2, 4);
-                            $openingprice = preg_replace("/,/", "", $output[$c3]['openingprice']);
-                            $pricex1 = number_format($output[$c3]['price'] * 1.017);
-                            $pricex2 = number_format($output[$c3]['price'] * 1.027);
+                        //return $bidprice;
+                        $incli = number_format($output[$c3]['inclination'], 1);
+                        $intercept = number_format($output[$c3]['intercept'], 1);
+                        $k_diff1 = number_format($k_diff1, 4);
+                        $k_diff2 = number_format($k_diff2, 4);
+                        $openingprice = preg_replace("/,/", "", $output[$c3]['openingprice']);
+                        $pricex1 = number_format($output[$c3]['price'] * 1.017);
+                        $pricex2 = number_format($output[$c3]['price'] * 1.027);
 
-                            $expl = "{$output[$c3]['time']}, $c3, {$incli}, {$output[$c3]['price']}, $pricex1, $pricex2, , $intercept, $openingprice, ";
-                            $expl .= "$vdiff1, $vdiff2, {$output[$c3]['tradingvolume']}, ";
-                            $expl .= "{$diff1}, {$diff2}, $k_diff1, $k_diff2, ";
-                            $expl .= "{$wrate}, {$prate}, {$drate}, $vrate, {$output[$c3]['changepreviouscloseper']}, $srate, ";
-                            $expl .= "{$output[$c3]['bidqty']}, {$output[$c3]['askqty']}, ";
-                            $expl .= "{$output[$c3]['marketordersellqty']}, {$output[$c3]['marketorderbuyqty']}, ";
-                            $expl .= "{$output[$c3]['oversellqty']}, {$output[$c3]['underbuyqty']}, ";
-                            $expl .= "{$output[$c3]['currentpricechangestatus']}, ";
+                        $expl = "{$output[$c3]['time']}, $c3, {$incli}, {$output[$c3]['price']}, $pricex1, $pricex2, , $intercept, $openingprice, ";
+                        $expl .= "$vdiff1, $vdiff2,, {$output[$c3]['tradingvolume']}, ";
+                        $expl .= "{$diff1}, {$diff2},, $k_diff1, $k_diff2,, ";
+                        $expl .= "{$wrate}, {$prate}, {$drate}, $vrate, {$output[$c3]['changepreviouscloseper']}, $srate, ";
+                        $expl .= "{$output[$c3]['bidqty']}, {$output[$c3]['askqty']}, ";
+                        $expl .= "{$output[$c3]['marketordersellqty']}, {$output[$c3]['marketorderbuyqty']}, ";
+                        $expl .= "{$output[$c3]['oversellqty']}, {$output[$c3]['underbuyqty']}, ";
+                        $expl .= "{$output[$c3]['currentpricechangestatus']}, ";
 
 
-                            return  $expl;
+                        return  $expl;
                         //}
-                    }
+                    //}
                 }
             }
         }
