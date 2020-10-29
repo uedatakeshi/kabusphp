@@ -61,9 +61,12 @@ for ($i = 0; $i < 2; $i++) {// 認証が切れても再接続を試みる
 	                if ($bidprice = checkOrder($v, $loop)) {
 	                    $cash = $kabus->getcash();
 	                    if ($cash['StockAccountWallet'] > $bidprice * 100) {
-	                        // ここで注文を入れる
-	                        $orderbuys[$v] = $kabus->getsendorder($v, $bidprice);
-	                        //$orderbuys[$v] = $kabus->dummyOrder($v, $bidprice);// debug ダミー注文
+                            $confirm = $kabus->getSymbol($v, 1);// 直前にチェック
+                            if ($confirm['CurrentPriceChangeStatus'] == '0057') {
+                                // ここで注文を入れる
+                                $orderbuys[$v] = $kabus->getsendorder($v, $bidprice);
+                                //$orderbuys[$v] = $kabus->dummyOrder($v, $bidprice);// debug ダミー注文
+                            }
 	                    }
 	                }
 	            }
@@ -102,7 +105,7 @@ function sonGiri($kabus, $orders, $ordersell, $symbol, $item) {
     foreach ($orders as $val) {
         if (($val['Symbol'] == $symbol) && ($val['ID'] == $ordersell)) {
             if (($val['State'] == 3) && ($val['OrderState'] == 3) && ($val['CumQty'] == 0)) {
-                $songiri = intval($val['Price'] * 0.9714);// 売りの指値から逆算
+                $songiri = intval($val['Price'] * 0.973);// 売りの指値から逆算
                 if ($item['CurrentPrice'] <= $songiri) {
                     if ($kabus->cancelorders($ordersell)) {
                         $sellPrice = $item['AskPrice'];

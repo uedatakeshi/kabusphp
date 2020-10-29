@@ -6,7 +6,7 @@ date_default_timezone_set('Asia/Tokyo');
 
 $db = pg_connect("host=localhost dbname=" . DB_NAME. " user=" . DB_USER . " password=" . DB_PASS);
 
-$reg_date = "2020-10-28";
+$reg_date = "2020-10-27";
 
 $query = <<<END
     SELECT 
@@ -63,13 +63,13 @@ exit;
 function checkOrder($symbol, $loop) {
     global $reg_date;
     global $loop_change;
-    if ($loop < $loop_change) {
+    //if ($loop < $loop_change) {
         $loop_array = range($loop, $loop - 2);
         list($c3, $c2, $c1) = $loop_array; 
-    } else {
-        $loop_array = range($loop, $loop - 3);
-        list($c4, $c3, $c2, $c1) = $loop_array; 
-    }
+    //} else {
+      //  $loop_array = range($loop, $loop - 3);
+       // list($c4, $c3, $c2, $c1) = $loop_array; 
+    //}
     $loop_in = implode(",", $loop_array);
 
     $output = [];
@@ -128,11 +128,11 @@ END;
         }
     }
 
-    if ($loop < $loop_change) {
+    //if ($loop < $loop_change) {
         return calcThird($output, $loop_array);
-    } else {
-        return calcFourth($output, $loop_array);
-    }
+    //} else {
+     //   return calcFourth($output, $loop_array);
+   // }
 }
 
 function calcFourth($output, $loop_array) {
