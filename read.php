@@ -62,9 +62,10 @@ for ($i = 0; $i < 2; $i++) {// 認証が切れても再接続を試みる
 	                    $cash = $kabus->getcash();
 	                    if ($cash['StockAccountWallet'] > $bidprice * 100) {
                             $confirm = $kabus->getSymbol($v, 1);// 直前にチェック
+                            print_r($confirm);
                             if ($confirm['CurrentPriceChangeStatus'] == '0057') {
                                 // ここで注文を入れる
-                                $orderbuys[$v] = $kabus->getsendorder($v, $bidprice);
+                                $orderbuys[$v] = $kabus->getsendorder($v, $confirm['CurrentPrice']);
                                 //$orderbuys[$v] = $kabus->dummyOrder($v, $bidprice);// debug ダミー注文
                             }
 	                    }
