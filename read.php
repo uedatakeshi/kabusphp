@@ -108,7 +108,8 @@ function sonGiri($kabus, $orders, $ordersell, $symbol, $item) {
     foreach ($orders as $val) {
         if (($val['Symbol'] == $symbol) && ($val['ID'] == $ordersell)) {
             if (($val['State'] == 3) && ($val['OrderState'] == 3) && ($val['CumQty'] == 0)) {
-                $songiri = intval($val['Price'] * 0.973);// 売りの指値から逆算
+                //$songiri = intval($val['Price'] * 0.973);// 売りの指値から逆算
+                $songiri = number_format($val['Price'] - ((1000 + 1000)/100));// 売りの指値から逆算
                 if ($item['CurrentPrice'] <= $songiri) {
                     if ($kabus->cancelorders($ordersell)) {
                         $sellPrice = $item['AskPrice'];
