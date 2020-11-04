@@ -60,7 +60,9 @@ for ($i = 0; $i < 2; $i++) {// 認証が切れても再接続を試みる
 	            if ($zloop >= 3) {
 	                if ($bidprice = checkOrder($v, $loop)) {
 	                    $cash = $kabus->getcash();
-	                    if ($cash['StockAccountWallet'] > $bidprice * 100) {
+                        $amount = $bidprice * 100;
+                        $fee = getFee($amount);
+	                    if ($cash['StockAccountWallet'] > $amount + $fee) {
                             $confirm = $kabus->getSymbol($v, 1);// 直前にチェック
                             print_r($confirm);
                             if ($confirm['CurrentPriceChangeStatus'] == '0057') {
@@ -139,12 +141,15 @@ function uriChumon($kabus, $orders, $orderbuy, $symbol) {
                 $info = $kabus->getinfo($symbol, 1);// 東証のみなので全部1
 
                 $UpperLimit = $info['UpperLimit'];// 値幅制限
-                $sellPrice = intval($val['Price'] * 1.017);
+                $buyPrice = $val['Price'];
+                $amount = $buyPrice * 100;
+                $fee = getFee($amount);
+                $sellQty = $val['CumQty'];
+                //$sellPrice = intval($val['Price'] * 1.017);
+                $sellPrice = number_format($buyPrice * (1 + (1000 + $fee)/($sellQty * $buyPrice)));
                 if ($sellPrice > $UpperLimit) {// ここで値幅制限チェック
                     $sellPrice = $UpperLimit;
                 }
-
-                $sellQty = $val['CumQty'];
                 // ここで売り処理 26:不成（後場) 25:不成（前場）
                 $order_id = $kabus->getsendorder($symbol, $sellPrice, '1', 0, '  ', $sellQty, $code);
                 //$ordersell[$v] = $kabus->dummyOrder($symbol, $sellPrice, '1', 0, '  ', $sellQty, 26);
@@ -567,5 +572,22 @@ END;
     $ans['s'] = $B;
 
     return $ans;
+}
+
+function getFee($amount) {
+    if ($amount <= 100000) {
+        $fee = 99;
+    } elseif ($amount <= 200000) {
+        $fee = 198;
+    } elseif ($amount <= 500000) {
+        $fee = 275;
+    } elseif ($amount > 500000) {
+        $fee = $amount * 0.099 * 0.01 + 99;
+        if ($fee > 4059) {
+            $fee = 4059;
+        }
+    }
+
+    return $fee;
 }
 
