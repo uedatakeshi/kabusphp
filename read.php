@@ -506,7 +506,7 @@ function calcThird($output, $loop_array) {
         if (($k_diff1 > $k_diff2) && ($k_diff1 > 0.1) && ($k_diff2 > 0.01)) {
             if (($diff1 > $diff2) && ($diff2 >= 0) && ($vdiff1 > $vdiff2) && ($vdiff1 > 10000)) {
                 if ($output[$c3]['currentpricechangestatus'] == '0057') {
-                    if (($prate > 1) && ($drate > 1)) {
+                    if ($prate > 1) {
                         return $bidprice;
                     }
                 }
