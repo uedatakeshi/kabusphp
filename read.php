@@ -166,7 +166,7 @@ function uriChumon($kabus, $orders, $orderbuy, $symbol) {
 }
 
 function checkOrder($symbol, $loop) {
-	global $change_loop;
+    global $change_loop;
     $loop_array = range($loop, $loop - 2);
     list($c3, $c2, $c1) = $loop_array; 
     $loop_in = implode(",", $loop_array);
@@ -327,14 +327,14 @@ function calcThird($output, $loop_array) {
     $j_time = mktime(9, 30, 0);
 
     if (isset($output[$c3]['currentpricestatus'])) {
-    	$currentpricestatus = $output[$c3]['currentpricestatus'];
+        $currentpricestatus = $output[$c3]['currentpricestatus'];
     } else {
-    	return false;
+        return false;
     }
     if (isset($output[$c3]['bidprice'])) {
-    	$bidprice = $output[$c3]['bidprice'];
+        $bidprice = $output[$c3]['bidprice'];
     } else {
-    	return false;
+        return false;
     }
     // 傾き１差分
     if (isset($output[$c3]['inclination']) && isset($output[$c2]['inclination'])) {
@@ -416,9 +416,7 @@ function calcThird($output, $loop_array) {
             if (($drate > 0) && ($qrate < 10) && ($output[$c3]['changepreviouscloseper'] > 1)) {
                 if (($output[$c3]['price'] > $y0 ) || ($output[$c3]['price'] > $y1) && ($y0 > $y1)) {
                     if ($output[$c3]['currentpricechangestatus'] == '0057') {
-                        if ($prate > 1) {
-                            return $bidprice;
-                        }
+                        return $bidprice;
                     }
                 }
             }
