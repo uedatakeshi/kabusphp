@@ -8,7 +8,7 @@ $zenba_s = mktime(9, 0, 0);// 前場寄付
 $zenba_e = mktime(11, 32, 0);//前場引け
 $goba_s = mktime(12, 30, 0);//後場寄付
 $goba_e = mktime(14, 55, 0);//後場引け
-$change_loop = mktime(9, 30, 0);// 前場寄付
+$change_loop = mktime(9, 30, 0);// 
 $reg_date = date("Y-m-d");
 $db = pg_connect("host=localhost dbname=" . DB_NAME. " user=" . DB_USER . " password=" . DB_PASS);
 
@@ -94,7 +94,7 @@ for ($i = 0; $i < 2; $i++) {// 認証が切れても再接続を試みる
 			$kabus->removeAll();// API銘柄リストをリセット
 	        echo $loop . "\n";
 	        //echo $zloop . "\n";
-	        sleep(1);//sleep(3 * 60); // 5分おき
+	        sleep(90);//sleep(3 * 60); // 1分30秒待ち
 	    }
 	    if ($this_time > $goba_e) {
 	        break;
@@ -134,7 +134,7 @@ function uriChumon($kabus, $orders, $orderbuy, $symbol) {
     if (time() > $zenba_e) {
         $code = 26;
     } else {
-        $code = 25;
+        $code = 26;
     }
     foreach ($orders as $val) {
         if (($val['Symbol'] == $symbol) && ($val['ID'] == $orderbuy)) {
@@ -167,13 +167,8 @@ function uriChumon($kabus, $orders, $orderbuy, $symbol) {
 
 function checkOrder($symbol, $loop) {
 	global $change_loop;
-    if (time() < $change_loop) {
-        $loop_array = range($loop, $loop - 2);
-        list($c3, $c2, $c1) = $loop_array; 
-    } else {
-        $loop_array = range($loop, $loop - 3);
-        list($c4, $c3, $c2, $c1) = $loop_array; 
-    }
+    $loop_array = range($loop, $loop - 2);
+    list($c3, $c2, $c1) = $loop_array; 
     $loop_in = implode(",", $loop_array);
     $reg_date = date("Y-m-d");
     $output = [];
@@ -215,11 +210,7 @@ END;
         }
     }
 
-    if (time() < $change_loop) {
-        return calcThird($output, $loop_array);
-    } else {
-        return calcFourth($output, $loop_array);
-    }
+    return calcThird($output, $loop_array);
 }
 
 function insQuery($item, $loop, $ans) {
@@ -331,106 +322,6 @@ END;
     return $query;
 }
 
-function calcFourth($output, $loop_array) {
-    list($c4, $c3, $c2, $c1) = $loop_array; 
-    $j_time = mktime(10, 20, 0);
-
-    if (isset($output[$c4]['currentpricestatus'])) {
-    	$currentpricestatus = $output[$c4]['currentpricestatus'];
-    } else {
-    	return false;
-    }
-    if (isset($output[$c4]['bidprice'])) {
-    	$bidprice = $output[$c4]['bidprice'];
-    } else {
-    	return false;
-    }
-
-    // 傾き１差分
-    if (isset($output[$c4]['inclination']) && isset($output[$c3]['inclination'])) {
-        $k_diff1 = $output[$c4]['inclination'] - $output[$c3]['inclination'];
-    } else {
-        return false;
-    }
-    if (isset($output[$c3]['inclination']) && isset($output[$c2]['inclination'])) {
-        $k_diff2 = $output[$c3]['inclination'] - $output[$c2]['inclination'];
-    } else {
-        return false;
-    }
-    if (isset($output[$c2]['inclination']) && isset($output[$c1]['inclination'])) {
-        $k_diff3 = $output[$c2]['inclination'] - $output[$c1]['inclination'];
-    } else {
-        return false;
-    }// 傾きここまで
-
-    if (isset($output[$c4]['price']) && isset($output[$c3]['price'])) {
-        $diff1 = $output[$c4]['price'] - $output[$c3]['price'];
-        $vdiff1 = $output[$c4]['tradingvolume'] - $output[$c3]['tradingvolume'];
-    } else {
-        return false;
-    }
-    if (isset($output[$c3]['price']) && isset($output[$c2]['price'])) {
-        $diff2 = $output[$c3]['price'] - $output[$c2]['price'];
-        $vdiff2 = $output[$c3]['tradingvolume'] - $output[$c2]['tradingvolume'];
-    } else {
-        return false;
-    }
-    if (isset($output[$c2]['price']) && isset($output[$c1]['price'])) {
-        $diff3 = $output[$c2]['price'] - $output[$c1]['price'];
-        $vdiff3 = $output[$c2]['tradingvolume'] - $output[$c1]['tradingvolume'];
-    } else {
-        return false;
-    }
-    $prate = 0;
-    if (isset($output[$c4]['price']) && ($output[$c4]['price'] > 0)) {
-        $prate = round(100 * $diff1 / $output[$c4]['price'], 2);// 現在価格の上昇率
-    } else {
-        return false;
-    }
-    $vrate = 0;
-    if (isset($output[$c4]['tradingvolume']) && ($output[$c4]['tradingvolume'] > 0)) {
-        $vrate = round(100 * $vdiff1 / $output[$c4]['tradingvolume'], 2);// 現在出来高の上昇率
-    } else {
-        return false;
-    }
-    $wrate = 0;
-    if (isset($output[$c4]['vwap']) && ($output[$c4]['vwap'] > 0)) {
-        $wrate = round(100 * $output[$c4]['price'] / $output[$c4]['vwap'], 2);// VWAPの乖離率
-    } else {
-        return false;
-    }
-    if (isset($output[$c4]['openingprice'])) {
-        $drate = 100 * ($output[$c4]['price'] - $output[$c4]['openingprice']) / $output[$c4]['openingprice'];
-    } else {
-        return false;
-    }
-    // 始値
-    if (isset($output[$c4]['openingprice'])) {
-        if ($output[$c4]['price'] < $output[$c4]['openingprice']) {
-            return false;
-        }
-        $srate = round(100 * $output[$c4]['price'] / $output[$c4]['openingprice'], 2);// VWAPの乖離率
-    } else {
-        return false;
-    }
-
-    if (($output[$c4]['inclination'] > 0) && ($output[$c4]['inclination'] < 2)) {
-        if (($k_diff1 > $k_diff2) && ($k_diff2 > $k_diff3) && ($k_diff3 > 0.01)) {
-            if (($diff1 > $diff2) && ($diff2 > $diff3) && ($diff3 > 0)) {
-                if ((($vdiff1 > $vdiff3) || ($vdiff2 > $vdiff3)) && ($vdiff1 > 10000)) {
-                    if ($output[$c4]['currentpricechangestatus'] == '0057') {
-                        if (($prate > 0.1) ) {
-                            return $bidprice;
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    return false;
-}
-
 function calcThird($output, $loop_array) {
     list($c3, $c2, $c1) = $loop_array; 
     $j_time = mktime(9, 30, 0);
@@ -457,6 +348,22 @@ function calcThird($output, $loop_array) {
         return false;
     }
     // 傾きここまで
+
+    // 現在値の時間
+    $t0 = strtotime($output[$c3]['time']);
+
+    // 一つ前のloopの時間
+    $t1 = strtotime($output[$c2]['time']);
+
+    // ２つ前のloopの時間
+    $t2 = strtotime($output[$c1]['time']);
+
+    // レンジの上下幅
+    $dy = 1;
+
+    // 現在の傾き
+    $y0 = ($output[$c2]['inclination'] *  $c3) + $output[$c2]['intercept'];
+    $y1 = ($output[$c1]['inclination'] *  $c3) + $output[$c1]['intercept'];
 
     if (isset($output[$c3]['price']) && isset($output[$c2]['price'])) {
         $diff1 = $output[$c3]['price'] - $output[$c2]['price'];
@@ -494,20 +401,24 @@ function calcThird($output, $loop_array) {
         return false;
     }
     if (isset($output[$c3]['openingprice'])) {
-        if ($output[$c3]['price'] < $output[$c3]['openingprice']) {
-            return false;
-        }
         $srate = round(100 * $output[$c3]['price'] / $output[$c3]['openingprice'], 2);// 始値からの乖離率
     } else {
         return false;
     }
+    if (isset($output[$c3]['bidqty']) && ($output[$c3]['askqty'] > 0)) {
+        $qrate = $output[$c3]['bidqty'] / $output[$c3]['askqty'];// 気配の比率
+    } else {
+        return false;
+    }
 
-    if (($output[$c3]['inclination'] > 0) && ($output[$c3]['inclination'] < 2)) {
-        if (($k_diff1 > $k_diff2) && ($k_diff1 > 0.1) && ($k_diff2 > 0.01)) {
-            if (($diff1 > $diff2) && ($diff2 >= 0) && ($vdiff1 > $vdiff2) && ($vdiff1 > 10000)) {
-                if ($output[$c3]['currentpricechangestatus'] == '0057') {
-                    if ($prate > 1) {
-                        return $bidprice;
+    if ($output[$c3]['inclination'] > 0) {
+        if (($diff2 > 0) && ($diff1 > $diff2) && ($k_diff1 > $k_diff2) && ($vdiff1 > 10000)) {
+            if (($drate > 0) && ($qrate < 10) && ($output[$c3]['changepreviouscloseper'] > 1)) {
+                if (($output[$c3]['price'] > $y0 ) || ($output[$c3]['price'] > $y1) && ($y0 > $y1)) {
+                    if ($output[$c3]['currentpricechangestatus'] == '0057') {
+                        if ($prate > 1) {
+                            return $bidprice;
+                        }
                     }
                 }
             }
