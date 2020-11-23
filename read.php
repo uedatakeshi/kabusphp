@@ -131,7 +131,7 @@ function sonGiri($kabus, $orders, $ordersell, $symbol, $item) {
 
 function uriChumon($kabus, $orders, $orderbuy, $symbol) {
     global $zenba_e;
-    if (time() > $zenba_e) {
+    if (time() > mktime(11, 0, 0)) {
         $code = 26;
     } else {
         $code = 25;
