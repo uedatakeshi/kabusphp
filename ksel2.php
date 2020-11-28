@@ -4,7 +4,7 @@ date_default_timezone_set('Asia/Tokyo');
 
 $db = pg_connect("host=localhost dbname=kabus_db user=postgres password=pass123");
 
-$reg_date = "2020-11-25";
+$reg_date = "2020-11-27";
 
 $query = <<<END
     SELECT 

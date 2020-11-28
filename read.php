@@ -109,7 +109,7 @@ function sonGiri($kabus, $orders, $ordersell, $symbol, $item) {
         if (($val['Symbol'] == $symbol) && ($val['ID'] == $ordersell)) {
             if (($val['State'] == 3) && ($val['OrderState'] == 3) && ($val['CumQty'] == 0)) {
                 //$songiri = intval($val['Price'] * 0.973);// 売りの指値から逆算
-                $songiri = number_format($val['Price'] - ((1000 + 1000)/100));// 売りの指値から逆算
+                $songiri = round($val['Price'] - ((2000 + 1000)/100));// 売りの指値から逆算
                 if ($item['CurrentPrice'] <= $songiri) {
                     if ($kabus->cancelorders($ordersell)) {
                         $sellPrice = $item['AskPrice'];
@@ -131,10 +131,10 @@ function sonGiri($kabus, $orders, $ordersell, $symbol, $item) {
 
 function uriChumon($kabus, $orders, $orderbuy, $symbol) {
     global $zenba_e;
-    if (time() > mktime(11, 0, 0)) {
+    if (time() > mktime(10, 50, 0)) {
         $code = 26;
     } else {
-        $code = 26;
+        $code = 25;
     }
     foreach ($orders as $val) {
         if (($val['Symbol'] == $symbol) && ($val['ID'] == $orderbuy)) {
@@ -147,7 +147,7 @@ function uriChumon($kabus, $orders, $orderbuy, $symbol) {
                 $fee = getFee($amount);
                 $sellQty = $val['CumQty'];
                 //$sellPrice = intval($val['Price'] * 1.017);
-                $sellPrice = number_format($buyPrice * (1 + (1000 + $fee)/($sellQty * $buyPrice)));
+                $sellPrice = round($buyPrice * (1 + (2000 + $fee)/($sellQty * $buyPrice)));
                 if ($sellPrice > $UpperLimit) {// ここで値幅制限チェック
                     $sellPrice = $UpperLimit;
                 }
@@ -410,10 +410,14 @@ function calcThird($output, $loop_array) {
     } else {
         return false;
     }
+    $cal_loop = $c3 - 2 + 1;
+    if (($output[$c3]['tradingvolume'] / $cal_loop) < 5000) {
+        return false;
+    }
 
     if ($output[$c3]['inclination'] > 0) {
         if (($diff2 > 0) && ($diff1 > $diff2) && ($k_diff1 > $k_diff2) && ($vdiff1 > 10000)) {
-            if (($drate > 0) && ($qrate < 10) && ($output[$c3]['changepreviouscloseper'] > 1)) {
+            if (($drate > 0) && ($qrate < 10) && ($prate > 1) && ($output[$c3]['changepreviouscloseper'] > 1)) {
                 if (($output[$c3]['price'] > $y0 ) || ($output[$c3]['price'] > $y1) && ($y0 > $y1)) {
                     if ($output[$c3]['currentpricechangestatus'] == '0057') {
                         return $bidprice;
