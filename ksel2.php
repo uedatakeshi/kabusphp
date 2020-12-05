@@ -76,7 +76,7 @@ function checkOrder($symbol, $loop) {
         Symbol, 
         loop, CurrentPrice, CurrentPriceTime, CurrentPriceStatus, currentpricechangestatus, 
         BidPrice, vwap, ChangePreviousClosePer, tradingvolume, 
-        openingprice, lowprice, inclination, intercept,
+        openingprice, lowprice, highprice, previousclose, inclination, intercept,
         bidqty, bidsign, askqty, askprice, asksign, oversellqty, underbuyqty 
     FROM items
     WHERE symbol='{$symbol}' AND loop IN ({$loop_in}) and reg_date='{$reg_date}'
@@ -107,6 +107,8 @@ END;
                 $output[$myloop]['asksign'] = $row['asksign'];
                 $output[$myloop]['oversellqty'] = $row['oversellqty'];
                 $output[$myloop]['underbuyqty'] = $row['underbuyqty'];
+                $output[$myloop]['highprice'] = $row['highprice'];
+                $output[$myloop]['previousclose'] = $row['previousclose'];
             }
         }
     }
@@ -194,6 +196,13 @@ function calcThird($output, $loop_array) {
     } else {
         return false;
     }
+    if (isset($output[$c3]['previousclose'])) {
+        if ($output[$c3]['openingprice'] < $output[$c3]['previousclose']) {// 前日の終値より高く始まっていること
+            return false;
+        }
+    } else {
+        return false;
+    }
     if (isset($output[$c3]['openingprice'])) {
         $srate = round(100 * $output[$c3]['price'] / $output[$c3]['openingprice'], 2);// 始値からの乖離率
     } else {
@@ -204,49 +213,37 @@ function calcThird($output, $loop_array) {
     } else {
         return false;
     }
+    $diff_open_low = $output[$c3]['openingprice'] - $output[$c3]['lowprice'];// 始値と安値の差
+    
 
-    //if (($output[$c3]['inclination'] > 0) && ($output[$c3]['inclination'] < 2)) {
-        //if (($k_diff1 > $k_diff2) && ($k_diff1 > 0.1) && ($k_diff2 > 0.01)) {
-        //if (($k_diff1 > $k_diff2)) {
-            //if (($diff1 > $diff2) && ($diff2 >= 0) && ($vdiff1 > $vdiff2) && ($vdiff1 > 10000)) {
-            //if (($diff1 > $diff2) && ($vdiff1 > $vdiff2)) {
-                if ($output[$c3]['currentpricechangestatus'] == '0057') {
-                    //if (($prate > 0) && ($drate > 0)) {
-                        //if ($output[$c3]['bidqty'] && $output[$c3]['askqty'] && ($output[$c3]['bidqty'] < $output[$c3]['askqty'])) {
-                       // if (($output[$c3]['inclination'] > 0) && ($output[$c2]['inclination'] < 0)) {
-if (($output[$c3]['inclination'] > 0) && ($diff2 > 0) && ($diff1 > $diff2) && ($drate > 0) && ($vdiff1 > 10000)) {
-if (($k_diff1 > $k_diff2) && ($qrate < 10) && ($output[$c3]['changepreviouscloseper'] > 1)) {
-if (($output[$c3]['price'] > $y0 ) || ($output[$c3]['price'] > $y1) && ($y0 > $y1)) {
-                        //return $bidprice;
-                        $incli = number_format($output[$c3]['inclination'], 1);
-                        $intercept = number_format($output[$c3]['intercept'], 1);
-                        $k_diff1 = number_format($k_diff1, 4);
-                        $k_diff2 = number_format($k_diff2, 4);
-                        $openingprice = preg_replace("/,/", "", $output[$c3]['openingprice']);
-                        $pricex1 = number_format($output[$c3]['price'] * 1.017);
-                        $pricex2 = number_format($output[$c3]['price'] * 1.027);
+    if (($output[$c3]['inclination'] > 0) && ($diff2 > 0) && ($diff1 > $diff2) && ($drate > 0) && ($vdiff1 > 10000) && ($vdiff2 > 0)) {
+        if (($k_diff1 > $k_diff2) && ($qrate < 10) && ($prate > 0.7) && ($output[$c3]['changepreviouscloseper'] > 1)) {
+            if (($output[$c3]['price'] > $y0 ) || ($output[$c3]['price'] > $y1) && ($y0 > $y1)) {
+                if ($diff_open_low < 7) {
+                    //return $bidprice;
+                    $incli = number_format($output[$c3]['inclination'], 1);
+                    $intercept = number_format($output[$c3]['intercept'], 1);
+                    $k_diff1 = number_format($k_diff1, 4);
+                    $k_diff2 = number_format($k_diff2, 4);
+                    $openingprice = preg_replace("/,/", "", $output[$c3]['openingprice']);
+                    $pricex1 = number_format($output[$c3]['price'] * 1.017);
+                    $pricex2 = number_format($output[$c3]['price'] * 1.027);
 
-                        $expl = "{$output[$c3]['time']}, $c3, {$incli}, {$output[$c3]['price']}, $pricex1, $pricex2, , $intercept, $openingprice, ";
-                        $expl .= "$vdiff1, $vdiff2,, {$output[$c3]['tradingvolume']}, ";
-                        $expl .= "{$diff1}, {$diff2},, $k_diff1, $k_diff2,, ";
-                        $expl .= "{$wrate}, {$prate}, {$drate}, $vrate, {$output[$c3]['changepreviouscloseper']}, $srate, ";
-                        $expl .= "{$output[$c3]['bidqty']}, {$output[$c3]['askqty']}, ";
-                        $expl .= "$y0, $y1, ";
-                        $expl .= "{$output[$c3]['oversellqty']}, {$output[$c3]['underbuyqty']}, ";
-                        $expl .= "{$output[$c3]['currentpricechangestatus']}, ";
+                    $expl = "{$output[$c3]['time']}, $c3, {$incli}, {$output[$c3]['price']}, $pricex1, $pricex2, , $intercept, $openingprice, ";
+                    $expl .= "$vdiff1, $vdiff2,, {$output[$c3]['tradingvolume']}, ";
+                    $expl .= "{$diff1}, {$diff2},, $k_diff1, $k_diff2,, ";
+                    $expl .= "{$wrate}, {$prate}, {$drate}, $vrate, {$output[$c3]['changepreviouscloseper']}, $srate, ";
+                    $expl .= "{$output[$c3]['bidqty']}, {$output[$c3]['askqty']}, ";
+                    $expl .= "$y0, $y1, ";
+                    $expl .= "{$output[$c3]['oversellqty']}, {$output[$c3]['underbuyqty']}, ";
+                    $expl .= "{$output[$c3]['currentpricechangestatus']}, ";
 
 
-                        return  $expl;
-                        }
-                        }
-                        }
-                        }
-                       // }
-                   // }
-                //}
-            //}
-        //}
-    //}
+                    return  $expl;
+                }
+            }
+        }
+    }
 
     return false;
 
