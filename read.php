@@ -179,7 +179,7 @@ function checkOrder($symbol, $loop) {
         Symbol, 
         loop, CurrentPrice, CurrentPriceTime, CurrentPriceStatus, currentpricechangestatus, 
         BidPrice, vwap, ChangePreviousClosePer, tradingvolume, 
-        openingprice, lowprice, inclination, intercept,
+        openingprice, lowprice, previousclose, inclination, intercept,
         bidqty, askqty
     FROM items
     WHERE symbol='{$symbol}' AND loop IN ({$loop_in}) and reg_date='{$reg_date}'
@@ -208,6 +208,7 @@ END;
 
                 $output[$myloop]['bidqty'] = $row['bidqty'];
                 $output[$myloop]['askqty'] = $row['askqty'];
+                $output[$myloop]['previousclose'] = $row['previousclose'];
             }
         }
     }
@@ -402,6 +403,13 @@ function calcThird($output, $loop_array) {
     } else {
         return false;
     }
+    if (isset($output[$c3]['previousclose'])) {
+        if ($output[$c3]['openingprice'] < $output[$c3]['previousclose']) {// 前日の終値より高く始まっていること
+            return false;
+        }
+    } else {
+        return false;
+    }
     if (isset($output[$c3]['openingprice'])) {
         $srate = round(100 * $output[$c3]['price'] / $output[$c3]['openingprice'], 2);// 始値からの乖離率
     } else {
@@ -416,14 +424,13 @@ function calcThird($output, $loop_array) {
     if (($output[$c3]['tradingvolume'] / $cal_loop) < 5000) {
         return false;
     }
+    $diff_open_low = $output[$c3]['openingprice'] - $output[$c3]['lowprice'];// 始値と安値の差
 
-    if ($output[$c3]['inclination'] > 0) {
-        if (($diff2 > 0) && ($diff1 > $diff2) && ($k_diff1 > $k_diff2) && ($vdiff1 > 10000)) {
-            if (($drate > 0) && ($qrate < 10) && ($prate > 0.8) && ($vrate < 25) && ($output[$c3]['changepreviouscloseper'] > 1)) {
-                if (($output[$c3]['price'] > $y0 ) || ($output[$c3]['price'] > $y1) && ($y0 > $y1)) {
-                    if ($output[$c3]['currentpricechangestatus'] == '0057') {
-                        return $bidprice;
-                    }
+    if (($output[$c3]['inclination'] > 0) && ($diff2 > 0) && ($diff1 > $diff2) && ($drate > 0) && ($vdiff1 > 10000) && ($vdiff2 > 0)) {
+        if (($k_diff1 > $k_diff2) && ($qrate < 10) && ($prate > 0.7) && ($output[$c3]['changepreviouscloseper'] > 1)) {
+            if (($output[$c3]['price'] > $y0 ) || ($output[$c3]['price'] > $y1)) {
+                if ($y0 > $y1) {
+                    return $bidprice;
                 }
             }
         }

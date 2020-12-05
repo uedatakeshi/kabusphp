@@ -4,7 +4,7 @@ date_default_timezone_set('Asia/Tokyo');
 
 $db = pg_connect("host=localhost dbname=kabus_db user=postgres password=pass123");
 
-$reg_date = "2020-12-04";
+$reg_date = "2020-11-20";
 
 $query = <<<END
     SELECT 
@@ -45,9 +45,9 @@ if ($result) {
     }
 }
 
-//$sarray = array('2158', '3541', '3853');
+//$sarray = array('3928');
 //$sarray = array('2158','3656','3319','3793','1802','1719','3099','2398','2174','2395','3834','2345','7261','3541','8355','3939','3853','1893','1963','2516');
-$loop_change = 70;// 22
+$loop_change = 15;// 22
 foreach ($sarray as $v) {
 echo $v . "\n";
 //    for ($loop = 3; $loop < 70; $loop++) {
@@ -159,7 +159,6 @@ function calcThird($output, $loop_array) {
     // Œ»Ý‚ÌŒX‚«
     $y0 = ($output[$c2]['inclination'] *  $c3) + $output[$c2]['intercept'];
     $y1 = ($output[$c1]['inclination'] *  $c3) + $output[$c1]['intercept'];
-    
 
     if (isset($output[$c3]['price']) && isset($output[$c2]['price'])) {
         $diff1 = $output[$c3]['price'] - $output[$c2]['price'];
@@ -218,8 +217,9 @@ function calcThird($output, $loop_array) {
 
     if (($output[$c3]['inclination'] > 0) && ($diff2 > 0) && ($diff1 > $diff2) && ($drate > 0) && ($vdiff1 > 10000) && ($vdiff2 > 0)) {
         if (($k_diff1 > $k_diff2) && ($qrate < 10) && ($prate > 0.7) && ($output[$c3]['changepreviouscloseper'] > 1)) {
-            if (($output[$c3]['price'] > $y0 ) || ($output[$c3]['price'] > $y1) && ($y0 > $y1)) {
-                if ($diff_open_low < 7) {
+            if (($output[$c3]['price'] > $y0 ) || ($output[$c3]['price'] > $y1)) {
+                if ($y0 > $y1) {
+                    //if ($diff_open_low < 7) {
                     //return $bidprice;
                     $incli = number_format($output[$c3]['inclination'], 1);
                     $intercept = number_format($output[$c3]['intercept'], 1);
@@ -236,13 +236,14 @@ function calcThird($output, $loop_array) {
                     $expl .= "{$output[$c3]['bidqty']}, {$output[$c3]['askqty']}, ";
                     $expl .= "$y0, $y1, ";
                     $expl .= "{$output[$c3]['oversellqty']}, {$output[$c3]['underbuyqty']}, ";
-                    $expl .= "{$output[$c3]['currentpricechangestatus']}, ";
+                    $expl .= "{$output[$c3]['currentpricechangestatus']}, $diff_open_low";
 
 
                     return  $expl;
                 }
             }
         }
+        //}
     }
 
     return false;
