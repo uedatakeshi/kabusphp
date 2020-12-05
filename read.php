@@ -80,12 +80,14 @@ for ($i = 0; $i < 2; $i++) {// 認証が切れても再接続を試みる
 	                	unset($orderbuys[$v]);
 	                }
 	            }
+	            /*
 	            if (isset($ordersells[$v]) && $ordersells[$v]) {
 	                $orders = $kabus->getorders();
 	                if (sonGiri($kabus, $orders, $ordersells[$v], $v, $item)) {
 	                	unset($ordersells[$v]);
 	                }
                 }
+                */
 	        }
 	        $loop++;
 	        if ($this_time >= $zenba_s) {
@@ -94,7 +96,7 @@ for ($i = 0; $i < 2; $i++) {// 認証が切れても再接続を試みる
 			$kabus->removeAll();// API銘柄リストをリセット
 	        echo $loop . "\n";
 	        //echo $zloop . "\n";
-	        sleep(90);//sleep(3 * 60); // 1分30秒待ち
+	        //sleep(90);//sleep(3 * 60); // 1分30秒待ち
 	    }
 	    if ($this_time > $goba_e) {
 	        break;
@@ -134,7 +136,7 @@ function uriChumon($kabus, $orders, $orderbuy, $symbol) {
     if (time() > mktime(10, 50, 0)) {
         $code = 26;
     } else {
-        $code = 25;
+        $code = 26;
     }
     foreach ($orders as $val) {
         if (($val['Symbol'] == $symbol) && ($val['ID'] == $orderbuy)) {
@@ -417,7 +419,7 @@ function calcThird($output, $loop_array) {
 
     if ($output[$c3]['inclination'] > 0) {
         if (($diff2 > 0) && ($diff1 > $diff2) && ($k_diff1 > $k_diff2) && ($vdiff1 > 10000)) {
-            if (($drate > 0) && ($qrate < 10) && ($prate > 1) && ($output[$c3]['changepreviouscloseper'] > 1)) {
+            if (($drate > 0) && ($qrate < 10) && ($prate > 0.8) && ($vrate < 25) && ($output[$c3]['changepreviouscloseper'] > 1)) {
                 if (($output[$c3]['price'] > $y0 ) || ($output[$c3]['price'] > $y1) && ($y0 > $y1)) {
                     if ($output[$c3]['currentpricechangestatus'] == '0057') {
                         return $bidprice;

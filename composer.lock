@@ -1,9 +1,10 @@
 {
     "_readme": [
         "This file locks the dependencies of your project to a known state",
-        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
+    "hash": "41c2cdaeaecb13129d6b31517f71dccb",
     "content-hash": "5668f5528de4de0b75eced751c3a8b61",
     "packages": [
         {
@@ -47,7 +48,7 @@
                 "event-dispatcher",
                 "event-emitter"
             ],
-            "time": "2017-07-23T21:35:13+00:00"
+            "time": "2017-07-23 21:35:13"
         },
         {
             "name": "guzzlehttp/psr7",
@@ -118,7 +119,7 @@
                 "uri",
                 "url"
             ],
-            "time": "2020-09-30T07:37:11+00:00"
+            "time": "2020-09-30 07:37:11"
         },
         {
             "name": "monolog/monolog",
@@ -195,7 +196,7 @@
                 "logging",
                 "psr-3"
             ],
-            "time": "2020-07-23T08:35:51+00:00"
+            "time": "2020-07-23 08:35:51"
         },
         {
             "name": "psr/http-message",
@@ -245,7 +246,7 @@
                 "request",
                 "response"
             ],
-            "time": "2016-08-06T14:39:51+00:00"
+            "time": "2016-08-06 14:39:51"
         },
         {
             "name": "psr/log",
@@ -292,7 +293,7 @@
                 "psr",
                 "psr-3"
             ],
-            "time": "2020-03-23T09:12:05+00:00"
+            "time": "2020-03-23 09:12:05"
         },
         {
             "name": "ralouphie/getallheaders",
@@ -332,7 +333,7 @@
                 }
             ],
             "description": "A polyfill for getallheaders.",
-            "time": "2019-03-08T08:55:37+00:00"
+            "time": "2019-03-08 08:55:37"
         },
         {
             "name": "ratchet/pawl",
@@ -381,7 +382,7 @@
                 "websocket",
                 "websocket client"
             ],
-            "time": "2020-07-17T15:32:47+00:00"
+            "time": "2020-07-17 15:32:47"
         },
         {
             "name": "ratchet/rfc6455",
@@ -433,7 +434,7 @@
                 "rfc6455",
                 "websocket"
             ],
-            "time": "2020-05-15T18:31:24+00:00"
+            "time": "2020-05-15 18:31:24"
         },
         {
             "name": "react/cache",
@@ -495,17 +496,7 @@
                 "promise",
                 "reactphp"
             ],
-            "funding": [
-                {
-                    "url": "https://github.com/WyriHaximus",
-                    "type": "github"
-                },
-                {
-                    "url": "https://github.com/clue",
-                    "type": "github"
-                }
-            ],
-            "time": "2020-09-18T12:12:35+00:00"
+            "time": "2020-09-18 12:12:35"
         },
         {
             "name": "react/dns",
@@ -571,17 +562,7 @@
                 "dns-resolver",
                 "reactphp"
             ],
-            "funding": [
-                {
-                    "url": "https://github.com/WyriHaximus",
-                    "type": "github"
-                },
-                {
-                    "url": "https://github.com/clue",
-                    "type": "github"
-                }
-            ],
-            "time": "2020-09-18T12:12:55+00:00"
+            "time": "2020-09-18 12:12:55"
         },
         {
             "name": "react/event-loop",
@@ -623,7 +604,7 @@
                 "asynchronous",
                 "event-loop"
             ],
-            "time": "2020-01-01T18:39:52+00:00"
+            "time": "2020-01-01 18:39:52"
         },
         {
             "name": "react/promise",
@@ -669,7 +650,7 @@
                 "promise",
                 "promises"
             ],
-            "time": "2020-05-12T15:16:56+00:00"
+            "time": "2020-05-12 15:16:56"
         },
         {
             "name": "react/promise-timer",
@@ -722,7 +703,7 @@
                 "timeout",
                 "timer"
             ],
-            "time": "2020-07-10T12:18:06+00:00"
+            "time": "2020-07-10 12:18:06"
         },
         {
             "name": "react/socket",
@@ -792,17 +773,7 @@
                 "reactphp",
                 "stream"
             ],
-            "funding": [
-                {
-                    "url": "https://github.com/WyriHaximus",
-                    "type": "github"
-                },
-                {
-                    "url": "https://github.com/clue",
-                    "type": "github"
-                }
-            ],
-            "time": "2020-08-28T12:49:05+00:00"
+            "time": "2020-08-28 12:49:05"
         },
         {
             "name": "react/stream",
@@ -848,7 +819,7 @@
                 "stream",
                 "writable"
             ],
-            "time": "2020-05-04T10:17:57+00:00"
+            "time": "2020-05-04 10:17:57"
         }
     ],
     "packages-dev": [],
@@ -858,6 +829,5 @@
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": [],
-    "platform-dev": [],
-    "plugin-api-version": "1.1.0"
+    "platform-dev": []
 }
