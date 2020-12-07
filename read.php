@@ -429,7 +429,9 @@ function calcThird($output, $loop_array) {
         if (($k_diff1 > $k_diff2) && ($qrate < 10) && ($prate > 0.7) && ($output[$c3]['changepreviouscloseper'] > 1)) {
             if (($output[$c3]['price'] > $y0 ) || ($output[$c3]['price'] > $y1)) {
                 if ($y0 > $y1) {
-                    return $bidprice;
+	                if ($diff_open_low < 11) {
+	                    return $bidprice;
+					}
                 }
             }
         }
