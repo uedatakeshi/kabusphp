@@ -80,14 +80,12 @@ for ($i = 0; $i < 2; $i++) {// 認証が切れても再接続を試みる
 	                	unset($orderbuys[$v]);
 	                }
 	            }
-	            /*
 	            if (isset($ordersells[$v]) && $ordersells[$v]) {
 	                $orders = $kabus->getorders();
 	                if (sonGiri($kabus, $orders, $ordersells[$v], $v, $item)) {
 	                	unset($ordersells[$v]);
 	                }
                 }
-                */
 	        }
 	        $loop++;
 	        if ($this_time >= $zenba_s) {
@@ -111,7 +109,8 @@ function sonGiri($kabus, $orders, $ordersell, $symbol, $item) {
         if (($val['Symbol'] == $symbol) && ($val['ID'] == $ordersell)) {
             if (($val['State'] == 3) && ($val['OrderState'] == 3) && ($val['CumQty'] == 0)) {
                 //$songiri = intval($val['Price'] * 0.973);// 売りの指値から逆算
-                $songiri = round($val['Price'] - ((2000 + 1000)/100));// 売りの指値から逆算
+                //$songiri = round($val['Price'] - ((2000 + 1000)/100));// 売りの指値から逆算
+                $songiri = round(0.95 * $val['Price'] -19 + 0.01);// 売りの指値から逆算
                 if ($item['CurrentPrice'] <= $songiri) {
                     if ($kabus->cancelorders($ordersell)) {
                         $sellPrice = $item['AskPrice'];
