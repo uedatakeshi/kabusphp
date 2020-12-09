@@ -234,6 +234,32 @@ function insQuery($item, $loop, $ans) {
         $inclination = "null";
         $intercept = "null";
     }
+    for ($i = 1; $i < 11; $i++) {
+        $key = 'Sell' . $i;
+        if ($item[$key]['Qty'] == "") {
+            $Sell_Qty[$i] = "null";
+        } else {
+            $Sell_Qty[$i] = "'" . $item[$key]['Qty'] . "'";
+        }
+        if ($item[$key]['Price'] == "") {
+            $Sell_Price[$i] = "null";
+        } else {
+            $Sell_Price[$i] = "'" . $item[$key]['Price'] . "'";
+        }
+    }
+    for ($i = 1; $i < 11; $i++) {
+        $key = 'Buy' . $i;
+        if ($item[$key]['Qty'] == "") {
+            $Buy_Qty[$i] = "null";
+        } else {
+            $Buy_Qty[$i] = "'" . $item[$key]['Qty'] . "'";
+        }
+        if ($item[$key]['Price'] == "") {
+            $Buy_Price[$i] = "null";
+        } else {
+            $Buy_Price[$i] = "'" . $item[$key]['Price'] . "'";
+        }
+    }
 
     $query = <<<END
     INSERT INTO items (
@@ -276,7 +302,48 @@ function insQuery($item, $loop, $ans) {
         AskQty,
         AskPrice,
         AskTime,
-        AskSign
+        AskSign,
+        Sell1_Price, 
+        Sell1_Qty, 
+        Sell2_Price, 
+        Sell2_Qty ,
+        Sell3_Price, 
+        Sell3_Qty, 
+        Sell4_Price, 
+        Sell4_Qty, 
+        Sell5_Price, 
+        Sell5_Qty, 
+        Sell6_Price, 
+        Sell6_Qty, 
+        Sell7_Price, 
+        Sell7_Qty, 
+        Sell8_Price, 
+        Sell8_Qty, 
+        Sell9_Price, 
+        Sell9_Qty, 
+        Sell10_Price,
+        Sell10_Qty, 
+        Buy1_Price, 
+        Buy1_Qty,
+        Buy2_Price, 
+        Buy2_Qty,
+        Buy3_Price, 
+        Buy3_Qty,
+        Buy4_Price, 
+        Buy4_Qty,
+        Buy5_Price, 
+        Buy5_Qty,
+        Buy6_Price, 
+        Buy6_Qty,
+        Buy7_Price, 
+        Buy7_Qty,
+        Buy8_Price, 
+        Buy8_Qty,
+        Buy9_Price, 
+        Buy9_Qty,
+        Buy10_Price,
+        Buy10_Qty,
+        created
     ) VALUES (
         '{$today}',
         $loop,
@@ -317,7 +384,48 @@ function insQuery($item, $loop, $ans) {
         {$item['AskQty']},
         {$item['AskPrice']},
         {$item['AskTime']},
-        {$item['AskSign']}
+        {$item['AskSign']},
+        {$Sell_Price[1]},
+        {$Sell_Qty[1]},
+        {$Sell_Price[2]},
+        {$Sell_Qty[2]},
+        {$Sell_Price[3]},
+        {$Sell_Qty[3]},
+        {$Sell_Price[4]},
+        {$Sell_Qty[4]},
+        {$Sell_Price[5]},
+        {$Sell_Qty[5]},
+        {$Sell_Price[6]},
+        {$Sell_Qty[6]},
+        {$Sell_Price[7]},
+        {$Sell_Qty[7]},
+        {$Sell_Price[8]},
+        {$Sell_Qty[8]},
+        {$Sell_Price[9]},
+        {$Sell_Qty[9]},
+        {$Sell_Price[10]},
+        {$Sell_Qty[10]},
+        {$Buy_Price[1]},
+        {$Buy_Qty[1]},
+        {$Buy_Price[2]},
+        {$Buy_Qty[2]},
+        {$Buy_Price[3]},
+        {$Buy_Qty[3]},
+        {$Buy_Price[4]},
+        {$Buy_Qty[4]},
+        {$Buy_Price[5]},
+        {$Buy_Qty[5]},
+        {$Buy_Price[6]},
+        {$Buy_Qty[6]},
+        {$Buy_Price[7]},
+        {$Buy_Qty[7]},
+        {$Buy_Price[8]},
+        {$Buy_Qty[8]},
+        {$Buy_Price[9]},
+        {$Buy_Qty[9]},
+        {$Buy_Price[10]},
+        {$Buy_Qty[10]},
+        CURRENT_TIMESTAMP
     ) 
 END;
 
