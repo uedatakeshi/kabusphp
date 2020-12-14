@@ -529,6 +529,12 @@ function calcThird($output, $loop_array) {
         return false;
     }
     $diff_open_low = $output[$c3]['openingprice'] - $output[$c3]['lowprice'];// 始値と安値の差
+    // ９時半以前でdrateが4以下
+    if (time() < $j_time) {
+        if ($drate > 4) {
+            return false;
+        }
+    }
 
     if (($output[$c3]['inclination'] > 0) && ($diff2 > 0) && ($diff1 > $diff2) && ($drate > 0) && ($vdiff1 > 10000) && ($vdiff2 > 0)) {
         if (($k_diff1 > $k_diff2) && ($qrate < 10) && ($prate > 0.7) && ($output[$c3]['changepreviouscloseper'] > 1)) {
