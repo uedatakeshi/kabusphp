@@ -70,6 +70,7 @@ for ($i = 0; $i < 2; $i++) {// 認証が切れても再接続を試みる
 	                    }
 	                }
 	            }
+/*
 	            if (isset($orderbuys[$v]) && $orderbuys[$v]) {
 	                // 注文約定照会getorders
 	                $orders = $kabus->getorders();
@@ -83,6 +84,7 @@ for ($i = 0; $i < 2; $i++) {// 認証が切れても再接続を試みる
 	                	unset($ordersells[$v]);
 	                }
                 }
+*/
 	        }
 	        $loop++;
 	        if ($this_time >= $zenba_s) {
@@ -530,8 +532,8 @@ function calcThird($output, $loop_array) {
     }
     $diff_open_low = $output[$c3]['openingprice'] - $output[$c3]['lowprice'];// 始値と安値の差
 
-    if (($output[$c3]['inclination'] > 0) && ($diff2 > 0) && ($diff1 > $diff2) && ($drate > 0) && ($vdiff1 > 10000) && ($vdiff2 > 0)) {
-        if (($k_diff1 > $k_diff2) && ($qrate < 10) && ($prate > 0.7) && ($output[$c3]['changepreviouscloseper'] > 1)) {
+    if (($output[$c3]['inclination'] > 0) && ($diff2 > 0) && ($drate > 0) && ($vdiff2 > 0)) {
+        if (($k_diff1 > $k_diff2) && ($qrate < 10) && ($output[$c3]['changepreviouscloseper'] > 1)) {
             if (($output[$c3]['price'] > $y0 ) || ($output[$c3]['price'] > $y1)) {
                 if ($y0 > $y1) {
 	                if ($diff_open_low < 11) {
