@@ -549,15 +549,54 @@ function calcThird($output, $loop_array) {
     $diff_open_low = $output[$c3]['openingprice'] - $output[$c3]['lowprice'];// 始値と安値の差
 
     // 気配ここから
-    $sell_sum = $output[$c3]['bidqty'] + $output[$c3]['oversellqty'];
-    foreach ($output[$c3]['sell'] as $k => $v) {
-        $sell_sum = $sell_sum + $v['qty'];
+    if ($output[$c3]['bidqty'] && $output[$c3]['askqty']) {
+	    $sell_sum[$c3] = $output[$c3]['bidqty'] + $output[$c3]['oversellqty'];
+	    foreach ($output[$c3]['sell'] as $k => $v) {
+	        $sell_sum[$c3] = $sell_sum[$c3] + $v['qty'];
+	    }
+	    $buy_sum[$c3] = $output[$c3]['askqty'] + $output[$c3]['underbuyqty'];
+	    foreach ($output[$c3]['buy'] as $k => $v) {
+	        $buy_sum[$c3] = $buy_sum[$c3] + $v['qty'];
+	    }
+	    $sperb[$c3] = round($sell_sum[$c3] / $buy_sum[$c3] * 100);
+    } else {
+	    return false;
     }
-    $buy_sum = $output[$c3]['askqty'] + $output[$c3]['underbuyqty'];
-    foreach ($output[$c3]['buy'] as $k => $v) {
-        $buy_sum = $buy_sum + $v['qty'];
-    }
-    $sperb = round($sell_sum / $buy_sum * 100);
+
+	if ($output[$c2]['bidqty'] && $output[$c2]['askqty']) {
+	    $sell_sum[$c2] = $output[$c2]['bidqty'] + $output[$c2]['oversellqty'];
+	    foreach ($output[$c2]['sell'] as $k => $v) {
+	        $sell_sum[$c2] = $sell_sum[$c2] + $v['qty'];
+	    }
+	    $buy_sum[$c2] = $output[$c2]['askqty'] + $output[$c2]['underbuyqty'];
+	    foreach ($output[$c2]['buy'] as $k => $v) {
+	        $buy_sum[$c2] = $buy_sum[$c2] + $v['qty'];
+	    }
+	    $sperb[$c2] = round($sell_sum[$c2] / $buy_sum[$c2] * 100);
+	} else {
+		return false;
+	}
+
+	if ($output[$c1]['bidqty'] && $output[$c1]['askqty']) {
+	    $sell_sum[$c1] = $output[$c1]['bidqty'] + $output[$c1]['oversellqty'];
+	    foreach ($output[$c1]['sell'] as $k => $v) {
+	        $sell_sum[$c1] = $sell_sum[$c1] + $v['qty'];
+	    }
+	    $buy_sum[$c1] = $output[$c1]['askqty'] + $output[$c1]['underbuyqty'];
+	    foreach ($output[$c1]['buy'] as $k => $v) {
+	        $buy_sum[$c1] = $buy_sum[$c1] + $v['qty'];
+	    }
+	    $sperb[$c1] = round($sell_sum[$c1] / $buy_sum[$c1] * 100);
+	} else {
+		return false;
+	}
+	// 
+	if ($sperb[$c3] > $sperb[$c2]) {
+		return false;
+	}
+	if ($sperb[$c2] > $sperb[$c1]) {
+		return false;
+	}
 
     // ９時半以前でdrateが4以下
     if (time() < $j_time) {
