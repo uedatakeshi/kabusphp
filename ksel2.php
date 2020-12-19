@@ -4,7 +4,7 @@ date_default_timezone_set('Asia/Tokyo');
 
 $db = pg_connect("host=localhost dbname=kabus_db user=postgres password=pass123");
 
-$reg_date = "2020-11-20";
+$reg_date = "2020-12-14";
 
 $query = <<<END
     SELECT 
@@ -46,12 +46,12 @@ if ($result) {
 }
 
 //$sarray = array('3928');
-//$sarray = array('2158','3656','3319','3793','1802','1719','3099','2398','2174','2395','3834','2345','7261','3541','8355','3939','3853','1893','1963','2516');
+$sarray = array('1789','1963','1966','3359','3645','3673','4246','4813','4824','4845','5726','5809','5991','6038','6077','6172','6175','6378','6464','6471','6473','6584','6618','6727','6804','7187','7702');
 $loop_change = 15;// 22
 foreach ($sarray as $v) {
 echo $v . "\n";
 //    for ($loop = 3; $loop < 70; $loop++) {
-    for ($loop = 3; $loop <= $loop_change; $loop++) {
+    for ($loop = 2; $loop <= $loop_change; $loop++) {
         if ($bidprice = checkOrder($v, $loop)) {
             echo "[{$v}], {$bidprice}\n";
             break;
@@ -215,10 +215,10 @@ function calcThird($output, $loop_array) {
     $diff_open_low = $output[$c3]['openingprice'] - $output[$c3]['lowprice'];// Žn’l‚ÆˆÀ’l‚Ì·
     
 
-    if (($output[$c3]['inclination'] > 0) && ($diff2 > 0) && ($diff1 > $diff2) && ($drate > 0) && ($vdiff1 > 10000) && ($vdiff2 > 0)) {
-        if (($k_diff1 > $k_diff2) && ($qrate < 10) && ($prate > 0.7) && ($output[$c3]['changepreviouscloseper'] > 1)) {
-            if (($output[$c3]['price'] > $y0 ) || ($output[$c3]['price'] > $y1)) {
-                if ($y0 > $y1) {
+    //if (($output[$c3]['inclination'] > 0) && ($diff2 > 0) && ($diff1 > $diff2) && ($drate > 0) && ($vdiff1 > 10000) && ($vdiff2 > 0)) {
+     //   if (($k_diff1 > $k_diff2) && ($qrate < 10) && ($prate > 0.7) && ($output[$c3]['changepreviouscloseper'] > 1)) {
+      //      if (($output[$c3]['price'] > $y0 ) || ($output[$c3]['price'] > $y1)) {
+        //        if ($y0 > $y1) {
                     //if ($diff_open_low < 7) {
                     //return $bidprice;
                     $incli = number_format($output[$c3]['inclination'], 1);
@@ -240,11 +240,11 @@ function calcThird($output, $loop_array) {
 
 
                     return  $expl;
-                }
-            }
-        }
+          //      }
+         //   }
+      //  }
         //}
-    }
+   // }
 
     return false;
 
