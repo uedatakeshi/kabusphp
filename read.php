@@ -7,7 +7,7 @@ $zenba_b = mktime(8, 56, 0);// 寄付前
 $zenba_s = mktime(9, 0, 0);// 前場寄付
 $zenba_e = mktime(11, 32, 0);//前場引け
 $goba_s = mktime(12, 30, 0);//後場寄付
-$goba_e = mktime(14, 55, 0);//後場引け
+$goba_e = mktime(15, 0, 0);//後場引け
 $change_loop = mktime(9, 30, 0);// 
 $reg_date = date("Y-m-d");
 $db = pg_connect("host=localhost dbname=" . DB_NAME. " user=" . DB_USER . " password=" . DB_PASS);
@@ -57,7 +57,7 @@ for ($i = 0; $i < 2; $i++) {// 認証が切れても再接続を試みる
 	            $result = pg_query($query);
 	            $n++;
 	            // select
-	            if ($zloop >= 3) {
+	            if ($zloop >= 1) {
 	                if ($bidprice = checkOrder($v, $loop)) {
 	                    $cash = $kabus->getcash();
                         $amount = $bidprice * 100;
