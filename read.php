@@ -594,16 +594,21 @@ function calcThird($output, $loop_array) {
 	if ($sperb[$c3] > $sperb[$c2]) {
 		return false;
 	}
-	if ($sperb[$c2] > $sperb[$c1]) {
+	if ($sperb[$c3] > $sperb[$c1]) {
+		return false;
+	}
+    if (($sperb[$c3] / $sperb[$c2]) > 0.8) {
 		return false;
 	}
 
     // ９時半以前でdrateが4以下
+    /*
     if (time() < $j_time) {
         if ($drate > 4) {
             return false;
         }
     }
+     */
 
     if (($output[$c3]['inclination'] > 0) && ($diff2 > 0) && ($drate > 0) && ($vdiff2 > 0)) {
         if (($k_diff1 > $k_diff2) && ($qrate < 10) && ($output[$c3]['changepreviouscloseper'] > 1)) {
