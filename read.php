@@ -173,12 +173,7 @@ function checkOrder($symbol, $loop) {
     $reg_date = date("Y-m-d");
     $output = [];
     $query = <<<END
-    SELECT 
-        Symbol, 
-        loop, CurrentPrice, CurrentPriceTime, CurrentPriceStatus, currentpricechangestatus, 
-        BidPrice, vwap, ChangePreviousClosePer, tradingvolume, 
-        openingprice, lowprice, previousclose, inclination, intercept,
-        bidqty, askqty
+    SELECT * 
     FROM items
     WHERE symbol='{$symbol}' AND loop IN ({$loop_in}) and reg_date='{$reg_date}'
     ORDER BY loop DESC 
@@ -207,6 +202,27 @@ END;
                 $output[$myloop]['bidqty'] = $row['bidqty'];
                 $output[$myloop]['askqty'] = $row['askqty'];
                 $output[$myloop]['previousclose'] = $row['previousclose'];
+
+                $output[$myloop]['sell'][1]['qty'] = $row['sell1_qty'];
+                $output[$myloop]['sell'][2]['qty'] = $row['sell2_qty'];
+                $output[$myloop]['sell'][3]['qty'] = $row['sell3_qty'];
+                $output[$myloop]['sell'][4]['qty'] = $row['sell4_qty'];
+                $output[$myloop]['sell'][5]['qty'] = $row['sell5_qty'];
+                $output[$myloop]['sell'][6]['qty'] = $row['sell6_qty'];
+                $output[$myloop]['sell'][7]['qty'] = $row['sell7_qty'];
+                $output[$myloop]['sell'][8]['qty'] = $row['sell8_qty'];
+                $output[$myloop]['sell'][9]['qty'] = $row['sell9_qty'];
+                $output[$myloop]['sell'][10]['qty'] = $row['sell10_qty'];
+                $output[$myloop]['buy'][1]['qty'] = $row['buy1_qty'];
+                $output[$myloop]['buy'][2]['qty'] = $row['buy2_qty'];
+                $output[$myloop]['buy'][3]['qty'] = $row['buy3_qty'];
+                $output[$myloop]['buy'][4]['qty'] = $row['buy4_qty'];
+                $output[$myloop]['buy'][5]['qty'] = $row['buy5_qty'];
+                $output[$myloop]['buy'][6]['qty'] = $row['buy6_qty'];
+                $output[$myloop]['buy'][7]['qty'] = $row['buy7_qty'];
+                $output[$myloop]['buy'][8]['qty'] = $row['buy8_qty'];
+                $output[$myloop]['buy'][9]['qty'] = $row['buy9_qty'];
+                $output[$myloop]['buy'][10]['qty'] = $row['buy10_qty'];
             }
         }
     }
@@ -531,6 +547,18 @@ function calcThird($output, $loop_array) {
         return false;
     }
     $diff_open_low = $output[$c3]['openingprice'] - $output[$c3]['lowprice'];// 始値と安値の差
+
+    // 気配ここから
+    $sell_sum = $output[$c3]['bidqty'] + $output[$c3]['oversellqty'];
+    foreach ($output[$c3]['sell'] as $k => $v) {
+        $sell_sum = $sell_sum + $v['qty'];
+    }
+    $buy_sum = $output[$c3]['askqty'] + $output[$c3]['underbuyqty'];
+    foreach ($output[$c3]['buy'] as $k => $v) {
+        $buy_sum = $buy_sum + $v['qty'];
+    }
+    $sperb = round($sell_sum / $buy_sum * 100);
+
     // ９時半以前でdrateが4以下
     if (time() < $j_time) {
         if ($drate > 4) {
