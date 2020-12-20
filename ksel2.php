@@ -180,6 +180,11 @@ function calcThird($output, $loop_array) {
     } else {
         return false;
     }
+
+    if ($diff1 <= 0) {
+        return false;
+    }
+    
     if (isset($output[$c2]['price']) && isset($output[$c1]['price'])) {
         $diff2 = $output[$c2]['price'] - $output[$c1]['price'];
         $vdiff2 = $output[$c2]['tradingvolume'] - $output[$c1]['tradingvolume'];
@@ -212,6 +217,11 @@ function calcThird($output, $loop_array) {
     } else {
         return false;
     }
+
+    if ($drate <= 1) {
+        return false;
+    }
+
     /*
     if (isset($output[$c3]['previousclose'])) {
         if ($output[$c3]['openingprice'] < $output[$c3]['previousclose']) {// 前日の終値より高く始まっていること
@@ -248,6 +258,10 @@ function calcThird($output, $loop_array) {
 	    return false;
     }
 
+    if ($sperb[$c3] > 100) {
+        return false;
+    }
+
 	if ($output[$c2]['bidqty'] && $output[$c2]['askqty']) {
 	    $sell_sum[$c2] = $output[$c2]['bidqty'] + $output[$c2]['oversellqty'];
 	    foreach ($output[$c2]['sell'] as $k => $v) {
@@ -282,17 +296,33 @@ function calcThird($output, $loop_array) {
 	if ($sperb[$c3] > $sperb[$c1]) {
 		return false;
 	}
-    if (($sperb[$c3] / $sperb[$c2]) > 0.8) {
+    if (($sperb[$c3] / $sperb[$c2]) > 0.81) {
 		return false;
 	}
     // 秒間出来高
-    $vpers[$c3] = round($vdiff1 / ($t0 - $t1));
-    $vpers[$c2] = round($vdiff2 / ($t1 - $t2));
-    $vper_rate = round( $vpers[$c3] / $vpers[$c2], 2);
+    if (($t0 - $t1) > 0) {
+        $vpers[$c3] = round($vdiff1 / ($t0 - $t1));
+    } else {
+		return false;
+    }
+    if (($t1 - $t2) > 0) {
+        $vpers[$c2] = round($vdiff2 / ($t1 - $t2));
+    } else {
+        return false;
+    }
+    if ($vpers[$c2] > 0) {
+        $vper_rate = round( $vpers[$c3] / $vpers[$c2], 2);
+    } else {
+        return false;
+    }
+    if ($vper_rate < 1.5) {
+		return false;
+    }
 
     //if (($output[$c3]['inclination'] > 0) && ($diff2 > 0) && ($diff1 > $diff2) && ($drate > 0) && ($vdiff1 > 10000) && ($vdiff2 > 0)) {
      //   if (($k_diff1 > $k_diff2) && ($qrate < 10) && ($prate > 0.7) && ($output[$c3]['changepreviouscloseper'] > 1)) {
       //      if (($output[$c3]['price'] > $y0 ) || ($output[$c3]['price'] > $y1)) {
+            if (($output[$c3]['changepreviouscloseper'] > 0) && ($output[$c3]['changepreviouscloseper'] < 2.5)) {
         //        if ($y0 > $y1) {
                     //if ($diff_open_low < 7) {
                     //return $bidprice;
@@ -315,7 +345,7 @@ function calcThird($output, $loop_array) {
 
                     return  $expl;
           //      }
-         //   }
+            }
       //  }
         //}
    // }
