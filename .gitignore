@@ -7,5 +7,6 @@ log/
 *~
 *.bak
 *_bak
+*.swp
 *.gz
 config.php
